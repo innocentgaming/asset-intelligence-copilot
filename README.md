@@ -297,3 +297,5 @@ python test_scripted_18_questions.py
 - **Automated Pytest Suite:** [`tests/`](tests/)
 - **Automated 18-Question Verification Suite:** [`test_scripted_18_questions.py`](test_scripted_18_questions.py)
 - **Open-Source License:** [`LICENSE`](LICENSE) (MIT)
+#   a s s e t - i n t e l l i g e n c e - c o p i l o t  
+ 
