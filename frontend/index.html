@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asset Intelligence Copilot | FlytBase Hackathon & Gemma 4</title>
+  
+  <!-- Modern Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet GIS Mapping -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Chart.js Data Visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Custom Dark Theme Design System -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <!-- Top Command Center Header -->
+  <header class="header">
+    <div class="brand">
+      <div class="brand-icon">🛢️</div>
+      <div>
+        <div class="brand-title">
+          <span>FLYTOPS · ASSET INTELLIGENCE COPILOT</span>
+          <span class="badge">Gemma 4 Multimodal</span>
+        </div>
+        <div class="brand-sub" id="fleet-ribbon">
+          200 Wells · 4 Geographic Blocks · Permian Basin (16 Oct 2026)
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="header-center">
+      <nav class="nav-tabs">
+        <button class="nav-tab active" data-tab="chat">
+          <span>💬</span> Copilot Chat
+        </button>
+        <button class="nav-tab" data-tab="benchmark">
+          <span>⚡</span> Benchmark Suite (Q1–Q18)
+        </button>
+        <button class="nav-tab" data-tab="assets">
+          <span>🌐</span> Field Assets
+        </button>
+        <button class="nav-tab" data-tab="knowledge">
+          <span>🧠</span> Knowledge Vault
+        </button>
+      </nav>
+    </div>
+
+    <!-- User Persona Switcher & Settings -->
+    <div class="header-right">
+      <div class="user-selector-wrapper">
+        <div class="user-avatar" id="user-avatar-badge">MT</div>
+        <div class="user-info">
+          <select id="user-select">
+            <option value="Michael Turner">Michael Turner (Prod. Supervisor)</option>
+            <option value="Jessica Reed">Jessica Reed (Field Inspector)</option>
+            <option value="Tyler Hughes">Tyler Hughes (Field Operator)</option>
+            <option value="Jake Morales">Jake Morales (Field Operator - SW)</option>
+            <option value="Laura Simmons">Laura Simmons (HSE Officer)</option>
+          </select>
+          <div class="user-role-badge" id="user-role-text">Production Supervisor · Northeast</div>
+        </div>
+      </div>
+
+      <button id="open-settings-btn" class="run-btn" style="padding: 8px 12px; display: flex; align-items: center; gap: 6px;">
+        <span>⚙️</span> Config
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Viewports -->
+  <main class="main-content">
+    
+    <!-- Tab 1: Copilot Chat -->
+    <section class="tab-pane active" id="tab-chat">
+      <div class="chat-container">
+        
+        <!-- Chat Control Bar (New Chat, Reset Memory, Download Transcript) -->
+        <div class="chat-toolbar" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--border-color); background: rgba(13, 21, 39, 0.5); border-radius: 12px 12px 0 0;">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button id="new-chat-btn" class="run-btn" style="padding: 6px 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px;" title="Start a fresh conversation thread">
+              <span>➕</span> <strong>New Chat</strong>
+            </button>
+            <button id="reset-memory-btn" class="run-btn" style="padding: 6px 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.3); color: #f87171;" title="Reset shared corrections and practice runs">
+              <span>🔄</span> <strong>Reset Memory</strong>
+            </button>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button id="export-transcript-btn" class="run-btn" style="padding: 6px 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.3); color: #38bdf8;" title="Export session transcript as Markdown">
+              <span>📥</span> <strong>Download Transcript (.md)</strong>
+            </button>
+          </div>
+        </div>
+
+        <!-- Benchmark Quick Prompt Chips -->
+        <div class="prompt-chips-bar">
+          <button class="prompt-chip" data-user="Michael Turner" data-prompt="Is WELL-0001 producing oil right now? When was it last inspected, and by whom? Show me its status card.">
+            <span>🟢 Q1:</span> WELL-0001 Live Status Card
+          </button>
+          <button class="prompt-chip" data-user="Michael Turner" data-prompt="Which wells in Northeast Block 8 are not producing oil right now, and why? Show them in a table.">
+            <span>📋 Q2:</span> NE-08 Non-Producing Wells Table
+          </button>
+          <button class="prompt-chip" data-user="Michael Turner" data-prompt="Show a line chart of WELL-0001's wellhead temperature against air temperature for the last 13 weeks, and mark when it was not producing oil.">
+            <span>📈 Q3:</span> 13-Week Thermal Line Chart
+          </button>
+          <button class="prompt-chip" data-user="Michael Turner" data-prompt="How many oil spills has WELL-0001 had in the last 4 years, and how much oil in total? List them in a table.">
+            <span>🛢️ Q4:</span> 4-Year Spills & Rainwater Removal
+          </button>
+          <button class="prompt-chip" data-user="Michael Turner" data-prompt="How many days was WELL-0001 down in 2025?">
+            <span>⏱️ Q5:</span> 2025 Downtime Accounting (21 Days)
+          </button>
+          <button class="prompt-chip" data-user="Michael Turner" data-prompt="Which 3 wells in Northeast Block 7 had the most downtime in the last 4 months? Show a bar chart.">
+            <span>📊 Q6:</span> NE-07 Top Downtime (Bar Chart)
+          </button>
+          <button class="prompt-chip" data-user="Michael Turner" data-prompt="Show on a map every well in Northeast Block 8 with a real spill in the last 90 days.">
+            <span>🗺️ Q7:</span> NE-08 Spills GIS Map
+          </button>
+          <button class="prompt-chip" data-user="Michael Turner" data-prompt="Show a heatmap of 2026 spills by geographic area and month.">
+            <span>🌡️ Q8:</span> 2026 Spills 2D Heatmap
+          </button>
+          <button class="prompt-chip" data-user="Michael Turner" data-prompt="Which rules has WELL-0001 broken in the last 12 months, and what is still open?">
+            <span>⚖️ Q9:</span> SOP Breaches & Open Fines ($5k)
+          </button>
+          <button class="prompt-chip" data-user="Michael Turner" data-prompt="In Southwest Block 24, which spills in the last 90 days were not contained within the SOP time limit?">
+            <span>🚨 Q10:</span> SW-24 4h Containment Breaches
+          </button>
+          <button class="prompt-chip" data-user="Michael Turner" data-prompt="For the three wells we discussed yesterday, what have repairs cost this year?">
+            <span>🧠 Q11:</span> Private Memory Cost Recall ($77.9k)
+          </button>
+          <button class="prompt-chip" data-user="Michael Turner" data-prompt="The 15 Oct reading for WELL-0164 is wrong. The handheld thermal gun used in that inspection was faulty; the field crew re-measured the wellhead at 41.0 °C.">
+            <span>🔧 Q12:</span> Raw Sensor Correction (41.0°C)
+          </button>
+          <button class="prompt-chip" data-user="Michael Turner" data-prompt="The AI estimated the 24 Sep spill at WELL-0151 as 4.5 bbl. The field crew measured 5.4 bbl.">
+            <span>🛢️ Q13:</span> AI Spill Volume Correction (5.4 bbl)
+          </button>
+          <button class="prompt-chip" data-user="Michael Turner" data-prompt="Note for all T350 wells: our team now wants a pump jack root-cause analysis after 2 repairs, not 3.">
+            <span>📜 Q14:</span> Custom Team Rule (T350 Scope)
+          </button>
+          <button class="prompt-chip" data-user="Jessica Reed" data-prompt="Is WELL-0164 producing oil right now?">
+            <span>🔄 Q15:</span> Shared Correction to Other Users
+          </button>
+          <button class="prompt-chip" data-user="Jessica Reed" data-prompt="For the three wells we discussed yesterday, what have repairs cost this year?">
+            <span>🔒 Q16:</span> Strict User Privacy Isolation
+          </button>
+          <button class="prompt-chip" data-user="Tyler Hughes" data-prompt="WELL-0175 is running fine.">
+            <span>⚡ Q17:</span> Real-Time Sensor Contradiction
+          </button>
+          <button class="prompt-chip" data-user="Laura Simmons" data-prompt="Was the 20 Aug spill at WELL-0101 real oil?">
+            <span>🔍 Q18:</span> Water vs Crude Disagreement
+          </button>
+        </div>
+
+        <!-- Chat Messages Area -->
+        <div class="chat-history" id="chat-history">
+          <!-- Initial Assistant Welcome Message -->
+          <div class="message assistant">
+            <div class="message-avatar">AI</div>
+            <div class="message-bubble">
+              <div style="font-size: 0.75rem; color: #38bdf8; margin-bottom: 6px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                <span>Gemma 4 Asset Intelligence Copilot</span>
+                <span class="gen-ui-badge">Multimodal Agent Ready</span>
+              </div>
+              <p>Welcome to the <strong>Asset Intelligence Copilot</strong>. I synthesize operational telemetry, drone inspection flights, free-text maintenance logs, SOP protocols, and human notes across 200 wells in the Permian field.</p>
+              <p>You are currently operating as <strong id="welcome-user">Michael Turner</strong> (Production Supervisor). I support generative UI inline visualizations, two-level memory (shared corrections &amp; strict user session privacy), and real-time conflict honesty.</p>
+              <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 6px;">💡 <em>Click any benchmark chip above or type natural-language questions about wells, temperatures, downtime, spills, or compliance.</em></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Input Bar -->
+        <div class="chat-input-bar">
+          <input type="text" id="chat-input" class="chat-input" placeholder="Ask about well status, downtime, spills, SOP violations, or submit corrections..." />
+          <button id="send-btn" class="chat-send-btn">
+            <span>Send</span>
+            <span>⚡</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 2: Benchmark Evaluation Suite (Q1 - Q18) -->
+    <section class="tab-pane" id="tab-benchmark">
+      <div class="benchmark-container">
+        <div class="benchmark-header">
+          <div>
+            <h2 style="font-size: 1.4rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px;">
+              <span>⚡</span> Benchmark Evaluator Suite
+              <span class="gen-ui-badge" id="bench-count-badge">18 Scenarios</span>
+            </h2>
+            <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px;">
+              Automated evaluation suite validating exact factual accuracy, evidence citation, generative visuals, and stateful multi-user memory against all 18 hackathon challenge scenarios.
+            </p>
+          </div>
+          <button id="run-all-bench-btn" class="chat-send-btn" onclick="runAllBenchmarks()">
+            <span>▶ Run All 18 Benchmark Tests</span>
+          </button>
+        </div>
+
+        <!-- Grid of 18 Scenarios -->
+        <div class="benchmark-grid" id="benchmark-grid"></div>
+      </div>
+    </section>
+
+    <!-- Tab 3: Field Assets Explorer -->
+    <section class="tab-pane" id="tab-assets">
+      <div class="benchmark-container">
+        <div class="benchmark-header">
+          <div>
+            <h2 style="font-size: 1.4rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px;">
+              <span>🌐</span> Permian Basin Fleet Asset Explorer
+            </h2>
+            <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px;">
+              Explore all 200 monitored well pads across Southwest and Northeast production blocks. Click to launch instant deep-audit copilot sessions.
+            </p>
+          </div>
+        </div>
+        <div id="assets-list-container"></div>
+      </div>
+    </section>
+
+    <!-- Tab 4: Knowledge Vault & Memory -->
+    <section class="tab-pane" id="tab-knowledge">
+      <div class="benchmark-container">
+        <div class="benchmark-header">
+          <div>
+            <h2 style="font-size: 1.4rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px;">
+              <span>🧠</span> Shared Knowledge & Memory Vault
+            </h2>
+            <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px;">
+              Two-level memory state: inspect active sensor corrections, custom domain rules per well type, unconfirmed operator claims, and isolated private user sessions.
+            </p>
+          </div>
+          <button class="run-btn" onclick="resetMemoryVault()" style="background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #f87171;">
+            <span>🔄 Reset to Baseline Data</span>
+          </button>
+        </div>
+        <div id="knowledge-display"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settings-modal">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="color: #fff; font-size: 1.15rem; font-weight: 600;">Gemma 4 & AI Configuration</h3>
+        <button id="close-settings-btn" style="background: none; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer;">&times;</button>
+      </div>
+      
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div>
+          <label style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 6px;">Google GenAI / Gemini API Key</label>
+          <input type="password" id="api-key-input" placeholder="AIzaSy..." 
+            style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 8px; color: #fff; outline: none; font-family: var(--font-mono);" />
+          <span style="font-size: 0.72rem; color: #64748b; margin-top: 4px; display: block;">
+            Used for live Gemma 4 model inference via Google GenAI SDK. If left blank, grounded hybrid engine handles queries.
+          </span>
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 6px;">Model Selection</label>
+          <select id="model-select" style="width: 100%; padding: 10px; background: #1e293b; border: 1px solid var(--border-color); border-radius: 8px; color: #fff; outline: none;">
+            <option value="gemma-4-31b-it">gemma-4-31b-it (Recommended Google Gemma 4 Model)</option>
+            <option value="gemma-4-26b-a4b-it">gemma-4-26b-a4b-it (Fast Gemma 4 Model)</option>
+            <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+          </select>
+        </div>
+
+        <div style="margin-top: 10px; display: flex; justify-content: flex-end; gap: 10px;">
+          <button id="save-settings-btn" class="chat-send-btn">Save Configuration</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Scripts -->
+  <script src="/static/js/visualizer.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
