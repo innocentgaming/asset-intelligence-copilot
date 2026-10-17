@@ -62,10 +62,22 @@ class Agent:
         self.model = os.environ.get("COPILOT_MODEL", "")
 
     def _get_endpoint_and_model(self):
+        base_url = os.environ.get("COPILOT_BASE_URL", "").strip()
+        model = self.model or os.environ.get("COPILOT_MODEL", "").strip()
         preset = self.preset.lower()
+
+        if base_url:
+            endpoint = base_url if base_url.endswith("/chat/completions") else f"{base_url.rstrip('/')}/chat/completions"
+            m = model or "gemma-4-31b-it"
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
+            return endpoint, m, headers
+
         if preset == "openrouter":
             endpoint = "https://openrouter.ai/api/v1/chat/completions"
-            model = self.model or "google/gemma-4-31b-it:free"
+            m = model or "google/gemma-4-31b-it:free"
             headers = {
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/json",
@@ -73,17 +85,17 @@ class Agent:
                 "X-Title": "FlytBase Asset Intelligence Copilot"
             }
         elif preset == "ollama":
-            endpoint = os.environ.get("COPILOT_BASE_URL", "http://localhost:11434/v1/chat/completions")
-            model = self.model or "gemma4:31b"
+            endpoint = "http://localhost:11434/v1/chat/completions"
+            m = model or "gemma4:31b"
             headers = {"Content-Type": "application/json"}
-        else: # aistudio
+        else: # aistudio default
             endpoint = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
-            model = self.model or "gemma-4-31b-it"
+            m = model or "gemma-4-31b-it"
             headers = {
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/json"
             }
-        return endpoint, model, headers
+        return endpoint, m, headers
 
     def _execute_tool(self, tool_name: str, args: Dict[str, Any], user_name: str):
         """
