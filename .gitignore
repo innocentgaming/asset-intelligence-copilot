@@ -14,3 +14,5 @@ copilot_memory.db
 Thumbs.db
 ds/
 .pytest_cache/
+node_modules/
+dist/

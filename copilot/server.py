@@ -14,8 +14,9 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
+from datetime import datetime
 
 # Ensure repository root is in python path
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -55,7 +56,9 @@ def init_app(data_paths):
     agent = Agent(indexer=indexer, memory=memory)
 
 class ChatRequest(BaseModel):
-    user_name: str
+    user_name: Optional[str] = None
+    user_id: Optional[str] = None
+    session_id: Optional[str] = None
     message: str
     api_key: Optional[str] = None
     model: Optional[str] = None
@@ -78,6 +81,139 @@ class RuleRequest(BaseModel):
 class ReloadRequest(BaseModel):
     data_root: str
 
+def format_visual_for_web(visual_type: str, visual_data: Any, sources: List[str]) -> List[Dict[str, Any]]:
+    if not visual_type or not visual_data:
+        return []
+
+    if visual_type == "status_card":
+        card_obj = {
+            "well": visual_data.get("well_id", "WELL-0001"),
+            "name": visual_data.get("name") or visual_data.get("well_id", ""),
+            "type": visual_data.get("well_type", "T200"),
+            "area": visual_data.get("area_name", "Permian Basin"),
+            "producing": bool(visual_data.get("is_producing", False)),
+            "delta_c": float(visual_data.get("diff_temp_c", 0.0) if visual_data.get("diff_temp_c") is not None else (visual_data.get("wellhead_temp_c", 0.0) - visual_data.get("ambient_temp_c", 0.0))),
+            "threshold_c": float(visual_data.get("threshold_c", 15.0)),
+            "wellhead_c": float(visual_data.get("wellhead_temp_c", 0.0)),
+            "ambient_c": float(visual_data.get("ambient_temp_c", 0.0)),
+            "inspection": visual_data.get("last_inspection_id", ""),
+            "date": visual_data.get("last_inspected_at", ""),
+            "inspector": visual_data.get("inspector_name", ""),
+            "method": visual_data.get("inspection_method", "drone"),
+            "recorded_status": visual_data.get("recorded_status", "active"),
+            "stale": bool(visual_data.get("status_out_of_date", False)),
+            "inspector_note": visual_data.get("inspector_note", ""),
+            "reasons": [visual_data.get("reason")] if visual_data.get("reason") else [],
+            "corrections": visual_data.get("corrections", []),
+            "conflicts": [visual_data.get("conflict")] if visual_data.get("conflict") else [],
+            "claims": visual_data.get("claims", [])
+        }
+        return [{
+            "type": "card",
+            "title": f"Status Card: {card_obj['well']}",
+            "sources": sources,
+            "cards": [card_obj]
+        }]
+
+    elif visual_type == "table":
+        columns = []
+        rows = []
+        if isinstance(visual_data, list) and visual_data and isinstance(visual_data[0], dict):
+            columns = list(visual_data[0].keys())
+            rows = [[item.get(col, "") for col in columns] for item in visual_data]
+        elif isinstance(visual_data, dict) and "columns" in visual_data and "rows" in visual_data:
+            columns = visual_data["columns"]
+            raw_rows = visual_data["rows"]
+            if raw_rows and isinstance(raw_rows[0], dict):
+                rows = [[item.get(col, "") for col in columns] for item in raw_rows]
+            else:
+                rows = raw_rows
+        return [{
+            "type": "table",
+            "title": "Data Table",
+            "sources": sources,
+            "columns": columns,
+            "rows": rows
+        }]
+
+    elif visual_type in ("line_chart", "line"):
+        labels = visual_data.get("labels", [])
+        if not labels and "x" in visual_data:
+            labels = visual_data.get("x", [])
+
+        series = visual_data.get("series", [])
+        if not series:
+            s_list = []
+            if "wellhead" in visual_data:
+                s_list.append({"name": "Wellhead", "values": visual_data["wellhead"]})
+            if "ambient" in visual_data:
+                s_list.append({"name": "Ambient Air", "values": visual_data["ambient"]})
+            series = s_list
+
+        markers = visual_data.get("markers", [])
+        if not markers and "not_producing_dates" in visual_data:
+            not_prod = set(visual_data.get("not_producing_dates", []))
+            markers = [{"index": idx, "label": "Not Producing"} for idx, lbl in enumerate(labels) if lbl in not_prod]
+
+        note = visual_data.get("note", "")
+        if not note and "threshold" in visual_data:
+            note = f"Operating threshold is {visual_data.get('threshold')} °C above ambient air."
+
+        return [{
+            "type": "line",
+            "title": visual_data.get("title", "Thermal Trend Analysis (13 Weeks)"),
+            "sources": sources,
+            "labels": labels,
+            "series": series,
+            "markers": markers,
+            "note": note
+        }]
+
+    elif visual_type in ("bar_chart", "bar"):
+        labels = visual_data.get("labels", [])
+        series = visual_data.get("series", [])
+        if not series and "values" in visual_data:
+            y_name = visual_data.get("y_title", "Days")
+            series = [{"name": y_name, "values": visual_data.get("values", [])}]
+
+        sublabels = visual_data.get("sublabels", [])
+        return [{
+            "type": "bar",
+            "title": visual_data.get("title", "Top Downtime Wells Comparison"),
+            "sources": sources,
+            "labels": labels,
+            "series": series,
+            "sublabels": sublabels
+        }]
+
+    elif visual_type == "map":
+        points = visual_data.get("points", [])
+        if not points and "pins" in visual_data:
+            points = visual_data.get("pins", [])
+        return [{
+            "type": "map",
+            "title": visual_data.get("title", "Geospatial Location Map"),
+            "sources": sources,
+            "points": points
+        }]
+
+    elif visual_type == "heatmap":
+        x = visual_data.get("x", [])
+        y = visual_data.get("y", [])
+        values = visual_data.get("values", [])
+        totals = visual_data.get("totals", [])
+        return [{
+            "type": "heatmap",
+            "title": visual_data.get("title", "2026 Monthly Incidents Heatmap"),
+            "sources": sources,
+            "x": x,
+            "y": y,
+            "values": values,
+            "totals": totals
+        }]
+
+    return []
+
 @app.get("/api/fleet/info")
 def get_fleet_info():
     return {
@@ -98,7 +234,13 @@ def get_fleet_info():
 
 @app.get("/api/users")
 def get_users():
-    return list(indexer.users.values())
+    users_list = list(indexer.users.values())
+    return {
+        "users": users_list,
+        "today": "2026-10-16",
+        "wells": len(indexer.wells_metadata),
+        "model": agent.model or "gemma-4-31b-it"
+    }
 
 @app.post("/api/chat")
 def chat(req: ChatRequest):
@@ -106,7 +248,55 @@ def chat(req: ChatRequest):
         agent.api_key = req.api_key.strip()
     if req.model:
         agent.model = req.model.strip()
-    return agent.run_query(user_name=req.user_name, query=req.message)
+
+    effective_user = req.user_name
+    if not effective_user and req.user_id:
+        u = indexer.users.get(req.user_id)
+        effective_user = u["name"] if u else req.user_id
+    if not effective_user:
+        effective_user = "Michael Turner"
+
+    raw_res = agent.run_query(user_name=effective_user, query=req.message)
+
+    text_ans = raw_res.get("text_answer") or raw_res.get("answer") or ""
+    v_type = raw_res.get("visual_type")
+    v_data = raw_res.get("visual_data")
+    citations = raw_res.get("evidence_citations") or raw_res.get("sources") or []
+
+    visuals = format_visual_for_web(v_type, v_data, citations)
+    wells = list(dict.fromkeys(re.findall(r"WELL-\d{4}", text_ans + " " + req.message, re.I)))
+
+    sess_id = req.session_id or f"sess_{effective_user.lower().replace(' ', '_')}_{int(datetime.now().timestamp())}"
+    memory.log_turn(
+        user_key=effective_user,
+        session_id=sess_id,
+        question=req.message,
+        answer=text_ans,
+        wells=wells,
+        visuals=visuals
+    )
+
+    return {
+        **raw_res,
+        "answer": text_ans,
+        "text_answer": text_ans,
+        "visuals": visuals,
+        "sources": citations,
+        "evidence_citations": citations,
+        "wells": wells,
+        "trace": [
+            {
+                "tool": raw_res.get("tool_invoked") or "analytics_engine",
+                "args": {"query": req.message},
+                "result_preview": (text_ans[:140] + "...") if len(text_ans) > 140 else text_ans
+            }
+        ],
+        "session_id": sess_id,
+        "usage": {
+            "model": agent.model or "gemma-4-31b-it",
+            "deterministic_grounding": True
+        }
+    }
 
 @app.get("/api/wells")
 def list_wells():
@@ -209,17 +399,73 @@ def get_well_details(well_id: str):
 @app.get("/api/knowledge")
 def get_knowledge_state():
     return {
-        "corrections": list(memory.corrections.values()),
+        "corrections": [
+            {
+                "record_id": c.get("inspection_id", ""),
+                "field": c.get("field", ""),
+                "original": str(c.get("original_value") or "--"),
+                "corrected": str(c.get("new_value") or ""),
+                "author": c.get("author", ""),
+                "reason": c.get("reason", ""),
+                "created_at": c.get("created_at", "2026-10-16")
+            }
+            for c in memory.corrections.values()
+        ],
+        "rules": [
+            {
+                "rule": "pump_jack_rca_threshold",
+                "scope_type": "well_type",
+                "scope_value": t,
+                "value": r.get("threshold", 2),
+                "equipment_kind": "pump_jack",
+                "author": r.get("author", "Michael Turner")
+            }
+            for t, r in memory.custom_rules.get("pump_jack_rca_threshold", {}).get("by_type", {}).items()
+        ],
+        "claims": [
+            {
+                "well_id": c.get("asset_id", ""),
+                "author": c.get("author", ""),
+                "text": c.get("claim", ""),
+                "state": "operating",
+                "verification": c.get("status", "unconfirmed"),
+                "created_at": c.get("created_at", "2026-10-16")
+            }
+            for c in memory.unconfirmed_claims
+        ],
         "custom_rules": memory.custom_rules,
         "shared_notes": memory.shared_notes,
         "unconfirmed_claims": memory.unconfirmed_claims,
         "active_user_contexts": {u: ctx for u, ctx in memory.user_context.items()}
     }
 
+@app.get("/api/sessions/{user_id}")
+def get_sessions(user_id: str):
+    u = indexer.users.get(user_id)
+    user_name = u["name"] if u else user_id
+    sessions = memory.get_user_sessions(user_name)
+    return {"sessions": sessions}
+
+@app.get("/api/session/{user_id}/{session_id}")
+def get_session_turns(user_id: str, session_id: str):
+    u = indexer.users.get(user_id)
+    user_name = u["name"] if u else user_id
+    turns = memory.get_session_turns(user_name, session_id)
+    return {"turns": turns}
+
+@app.post("/api/reset")
+def reset_all_memory():
+    memory.reset()
+    return {"status": "ok", "message": "Memory reset to initial sample state"}
+
 @app.post("/api/knowledge/reset")
 def reset_knowledge():
     memory.reset()
     return {"status": "ok", "message": "Memory reset to initial sample state"}
+
+@app.get("/api/transcript")
+def get_transcript_text():
+    return Response(content=memory.generate_transcript_markdown(), media_type="text/markdown")
 
 @app.post("/api/knowledge/correct")
 def add_manual_correction(req: CorrectionRequest):
@@ -420,11 +666,29 @@ def run_benchmark(scenario_id: str):
 
 # Mount static frontend
 static_dir = os.path.join(os.path.dirname(__file__), "static")
+app_dir = os.path.join(static_dir, "app")
+assets_dir = os.path.join(app_dir, "assets")
+
+os.makedirs(app_dir, exist_ok=True)
+os.makedirs(assets_dir, exist_ok=True)
+
+app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+app.mount("/app", StaticFiles(directory=app_dir), name="app")
 if os.path.exists(static_dir):
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 @app.get("/")
 def serve_index():
+    app_index = os.path.join(app_dir, "index.html")
+    if os.path.exists(app_index):
+        return FileResponse(
+            app_index,
+            headers={
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0"
+            }
+        )
     index_file = os.path.join(static_dir, "index.html")
     if os.path.exists(index_file):
         return FileResponse(
@@ -436,6 +700,20 @@ def serve_index():
             }
         )
     return {"message": "FlytBase Asset Intelligence Copilot API running."}
+
+@app.get("/classic")
+def serve_classic():
+    index_file = os.path.join(static_dir, "index.html")
+    if os.path.exists(index_file):
+        return FileResponse(
+            index_file,
+            headers={
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0"
+            }
+        )
+    return {"message": "Classic UI not found."}
 
 def main():
     parser = argparse.ArgumentParser(description="FlytBase Asset Intelligence Copilot Server")

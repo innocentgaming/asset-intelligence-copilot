@@ -386,5 +386,130 @@ class MemoryManager:
             """, (user_key, "discussed_wells", json.dumps(wells)))
             conn.commit()
 
+    def log_turn(self, user_key: str, session_id: str, question: str, answer: str, wells: List[str], visuals: List[Dict[str, Any]]):
+        user_key = user_key.lower().strip()
+        timestamp = datetime.now(timezone.utc).isoformat()
+        with self._get_connection() as conn:
+            c = conn.cursor()
+            c.execute("""
+                CREATE TABLE IF NOT EXISTS session_turns (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_key TEXT,
+                    session_id TEXT,
+                    question TEXT,
+                    answer TEXT,
+                    wells_json TEXT,
+                    visuals_json TEXT,
+                    timestamp TEXT
+                )
+            """)
+            c.execute("""
+                INSERT INTO session_turns (user_key, session_id, question, answer, wells_json, visuals_json, timestamp)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (user_key, session_id, question, answer, json.dumps(wells), json.dumps(visuals), timestamp))
+            conn.commit()
+
+    def get_user_sessions(self, user_key: str) -> List[Dict[str, Any]]:
+        user_key = user_key.lower().strip()
+        with self._get_connection() as conn:
+            c = conn.cursor()
+            c.execute("""
+                CREATE TABLE IF NOT EXISTS session_turns (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_key TEXT,
+                    session_id TEXT,
+                    question TEXT,
+                    answer TEXT,
+                    wells_json TEXT,
+                    visuals_json TEXT,
+                    timestamp TEXT
+                )
+            """)
+            c.execute("""
+                SELECT session_id, MIN(timestamp) as started, question as first_q, COUNT(*) as n
+                FROM session_turns
+                WHERE user_key = ?
+                GROUP BY session_id
+                ORDER BY MIN(timestamp) DESC
+            """, (user_key,))
+            rows = c.fetchall()
+            return [
+                {
+                    "session_id": r["session_id"],
+                    "started": r["started"][:16].replace("T", " ") if r["started"] else "2026-10-16",
+                    "first_q": r["first_q"] or "Conversation",
+                    "n": r["n"]
+                }
+                for r in rows
+            ]
+
+    def get_session_turns(self, user_key: str, session_id: str) -> List[Dict[str, Any]]:
+        user_key = user_key.lower().strip()
+        with self._get_connection() as conn:
+            c = conn.cursor()
+            c.execute("""
+                CREATE TABLE IF NOT EXISTS session_turns (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_key TEXT,
+                    session_id TEXT,
+                    question TEXT,
+                    answer TEXT,
+                    wells_json TEXT,
+                    visuals_json TEXT,
+                    timestamp TEXT
+                )
+            """)
+            c.execute("""
+                SELECT question, answer, wells_json, visuals_json
+                FROM session_turns
+                WHERE user_key = ? AND session_id = ?
+                ORDER BY id ASC
+            """, (user_key, session_id))
+            rows = c.fetchall()
+            return [
+                {
+                    "question": r["question"],
+                    "answer": r["answer"],
+                    "wells": json.loads(r["wells_json"]) if r["wells_json"] else [],
+                    "visual": json.loads(r["visuals_json"]) if r["visuals_json"] else []
+                }
+                for r in rows
+            ]
+
+    def generate_transcript_markdown(self) -> str:
+        md = "# FlytOps Asset Intelligence Copilot Transcript\n\n"
+        md += f"Generated: {datetime.now(timezone.utc).isoformat()} (Permian Basin Operations)\n\n---\n\n"
+        with self._get_connection() as conn:
+            c = conn.cursor()
+            c.execute("""
+                CREATE TABLE IF NOT EXISTS session_turns (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_key TEXT,
+                    session_id TEXT,
+                    question TEXT,
+                    answer TEXT,
+                    wells_json TEXT,
+                    visuals_json TEXT,
+                    timestamp TEXT
+                )
+            """)
+            c.execute("SELECT * FROM session_turns ORDER BY id ASC")
+            rows = c.fetchall()
+            if not rows:
+                return md + "*No recorded session turns in transcript yet.*\n"
+            for r in rows:
+                md += f"### User ({r['user_key'].title()}) [{r['timestamp'][:16].replace('T', ' ')}]:\n"
+                md += f"> {r['question']}\n\n"
+                md += f"**Copilot Answer:**\n\n{r['answer']}\n\n"
+                if r['visuals_json']:
+                    try:
+                        vis = json.loads(r['visuals_json'])
+                        if vis:
+                            md += f"*Visual Rendered: {', '.join(v.get('type', '') for v in vis)}*\n\n"
+                    except Exception:
+                        pass
+                md += "---\n\n"
+            return md
+
 # Alias
 Memory = MemoryManager

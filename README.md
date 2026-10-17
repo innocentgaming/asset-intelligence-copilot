@@ -277,13 +277,28 @@ COPILOT_MODEL=gemma-4-31b-it
 *(The copilot works with 100% accuracy out of the box using its local deterministic engine if no API key is set).*
 
 ### 5. Launch Application
-#### Option A: FastAPI Server + Single-Page Chat UI (Port 8000)
+#### Option A: FastAPI Production Server (Serves React 18 Console on `/` and Classic UI on `/classic`)
 ```powershell
 python -m copilot.server --data ds/sample-data
 ```
-Open **`http://localhost:8000`** in your browser.
+- Modern Operations Console: Open **`http://localhost:8000`** (Production Vite + React 18 + Tailwind bundle in `copilot/static/app`)
+- Classic Chat UI: Open **`http://localhost:8000/classic`**
 
-#### Option B: Streamlit Dashboard (Port 8501)
+#### Option B: Vite Frontend Dev Server (Hot Reload + Proxy)
+```powershell
+cd web
+npm install
+npm run dev
+```
+Open **`http://localhost:5173`** (or indicated port). Vite proxies `/api` requests to FastAPI on `http://127.0.0.1:8000`.
+
+To recompile the production bundle at any time:
+```powershell
+cd web
+npm run build
+```
+
+#### Option C: Streamlit Operational Dashboard (Port 8501)
 ```powershell
 python -m streamlit run streamlit_app.py
 ```
