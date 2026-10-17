@@ -3,36 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Asset Intelligence Copilot | FlytBase Hackathon & Gemma 4</title>
+  <title>FlytOps · Asset Intelligence Copilot | Permian Basin Command Center</title>
   
-  <!-- Modern Typography -->
+  <!-- Modern Industrial Typography: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   
-  <!-- Leaflet GIS Mapping -->
+  <!-- Leaflet GIS Mapping for Field Telemetry -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   
-  <!-- Chart.js Data Visualizations -->
+  <!-- Chart.js Real-time Data Visualizations -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- Custom Dark Theme Design System -->
-  <link rel="stylesheet" href="/static/css/style.css">
+  <!-- Custom Dark Theme Design System (cache-busted) -->
+  <link rel="stylesheet" href="/static/css/style.css?v=2.2">
 </head>
 <body>
 
-  <!-- Top Command Center Header -->
+  <!-- Top Enterprise Command Center Header -->
   <header role="banner" class="header">
     <div class="brand">
-      <div class="brand-icon" aria-hidden="true">🛢️</div>
+      <div class="brand-icon" aria-hidden="true">
+        <span class="brand-radar-ring"></span>
+        🛢️
+      </div>
       <div>
         <div class="brand-title">
           <span>FLYTOPS · ASSET INTELLIGENCE COPILOT</span>
-          <span class="badge">Gemma 4 Multimodal</span>
+          <span class="badge badge-gemma">Gemma 4 Multimodal</span>
         </div>
         <div class="brand-sub" id="fleet-ribbon">
-          200 Wells · 4 Geographic Blocks · Permian Basin (16 Oct 2026)
+          200 Monitored Wells · 4 Geographic Blocks · Permian Basin (16 Oct 2026)
         </div>
       </div>
     </div>
@@ -46,26 +49,37 @@
         <button role="tab" id="tab-btn-benchmark" aria-controls="tab-benchmark" aria-selected="false" class="nav-tab" data-tab="benchmark">
           <span aria-hidden="true">⚡</span> Benchmark Suite (Q1–Q18)
         </button>
+        <button role="tab" id="tab-btn-map" aria-controls="tab-map" aria-selected="false" class="nav-tab" data-tab="map">
+          <span aria-hidden="true">🗺️</span> GIS Fleet Map
+        </button>
         <button role="tab" id="tab-btn-assets" aria-controls="tab-assets" aria-selected="false" class="nav-tab" data-tab="assets">
-          <span aria-hidden="true">🌐</span> Field Assets
+          <span aria-hidden="true">🌐</span> Field Assets (200)
         </button>
         <button role="tab" id="tab-btn-knowledge" aria-controls="tab-knowledge" aria-selected="false" class="nav-tab" data-tab="knowledge">
           <span aria-hidden="true">🧠</span> Knowledge Vault
         </button>
+        <button role="tab" id="tab-btn-analytics" aria-controls="tab-analytics" aria-selected="false" class="nav-tab" data-tab="analytics">
+          <span aria-hidden="true">📊</span> Fleet Analytics
+        </button>
       </nav>
     </div>
 
-    <!-- User Persona Switcher & Settings -->
+    <!-- User Persona Switcher & Controls -->
     <div class="header-right">
+      <div class="live-status-pill">
+        <span class="pulse-dot"></span>
+        <span id="model-status-text">Gemma 4 Connected</span>
+      </div>
+
       <div class="user-selector-wrapper">
         <div class="user-avatar" id="user-avatar-badge" aria-hidden="true">MT</div>
         <div class="user-info">
           <select id="user-select" aria-label="Select active user persona">
             <option value="Michael Turner">Michael Turner (Prod. Supervisor)</option>
-            <option value="Jessica Reed">Jessica Reed (Field Inspector)</option>
-            <option value="Tyler Hughes">Tyler Hughes (Field Operator)</option>
+            <option value="Jessica Reed">Jessica Reed (Field Drone Inspector)</option>
+            <option value="Tyler Hughes">Tyler Hughes (Lead Pumper / Operator)</option>
             <option value="Jake Morales">Jake Morales (Field Operator - SW)</option>
-            <option value="Laura Simmons">Laura Simmons (HSE Officer)</option>
+            <option value="Laura Simmons">Laura Simmons (HSE Compliance Lead)</option>
           </select>
           <div class="user-role-badge" id="user-role-text">Production Supervisor · Northeast</div>
         </div>
@@ -77,6 +91,52 @@
     </div>
   </header>
 
+  <!-- Live Operations KPI Strip -->
+  <div class="kpi-strip" role="region" aria-label="Fleet operational metrics summary">
+    <div class="kpi-card">
+      <div class="kpi-icon">🛢️</div>
+      <div class="kpi-data">
+        <div class="kpi-val" id="kpi-total-wells">200</div>
+        <div class="kpi-label">Monitored Wells</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="color: #10b981;">🟢</div>
+      <div class="kpi-data">
+        <div class="kpi-val" id="kpi-active-wells">188</div>
+        <div class="kpi-label">Active Producing (94%)</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="color: #ef4444;">🔴</div>
+      <div class="kpi-data">
+        <div class="kpi-val" id="kpi-down-wells">12</div>
+        <div class="kpi-label">Shut-In / Down</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="color: #f59e0b;">⚠️</div>
+      <div class="kpi-data">
+        <div class="kpi-val" id="kpi-open-breaches">4</div>
+        <div class="kpi-label">Regulatory Breaches (>4h)</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="color: #38bdf8;">🗺️</div>
+      <div class="kpi-data">
+        <div class="kpi-val" id="kpi-blocks">4 Blocks</div>
+        <div class="kpi-label">NE-07, NE-08, SW-23, SW-24</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="color: #a855f7;">🧠</div>
+      <div class="kpi-data">
+        <div class="kpi-val" id="kpi-memory-items">17 Rules</div>
+        <div class="kpi-label">Two-Level SQLite Memory</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Main Viewports -->
   <main role="main" class="main-content">
     
@@ -85,78 +145,95 @@
       <div class="chat-container">
         
         <!-- Chat Control Bar (New Chat, Reset Memory, Download Transcript) -->
-        <div class="chat-toolbar" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--border-color); background: rgba(13, 21, 39, 0.5); border-radius: 12px 12px 0 0;">
+        <div class="chat-toolbar">
           <div style="display: flex; gap: 8px; align-items: center;">
-            <button id="new-chat-btn" class="run-btn" style="padding: 6px 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px;" title="Start a fresh conversation thread" aria-label="Start a fresh conversation session">
+            <button id="new-chat-btn" class="run-btn" title="Start a fresh conversation thread" aria-label="Start a fresh conversation session">
               <span aria-hidden="true">➕</span> <strong>New Chat</strong>
             </button>
-            <button id="reset-memory-btn" class="run-btn" style="padding: 6px 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.3); color: #f87171;" title="Reset shared corrections and practice runs" aria-label="Reset memory vault to initial baseline">
+            <button id="reset-memory-btn" class="run-btn btn-danger" title="Reset shared corrections and practice runs" aria-label="Reset memory vault to initial baseline">
               <span aria-hidden="true">🔄</span> <strong>Reset Memory</strong>
+            </button>
+            <button id="log-correction-btn" class="run-btn" style="background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.35); color: #c084fc;" title="Log raw sensor correction or custom domain rule">
+              <span aria-hidden="true">📝</span> <strong>Log Correction</strong>
             </button>
           </div>
           <div style="display: flex; gap: 8px; align-items: center;">
-            <button id="export-transcript-btn" class="run-btn" style="padding: 6px 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.3); color: #38bdf8;" title="Export session transcript as Markdown" aria-label="Download session transcript as Markdown file">
+            <span class="active-persona-pill" id="active-persona-display">
+              Persona: <strong id="persona-label-name">Michael Turner</strong>
+            </span>
+            <button id="export-transcript-btn" class="run-btn btn-export" title="Export session transcript as Markdown" aria-label="Download session transcript as Markdown file">
               <span aria-hidden="true">📥</span> <strong>Download Transcript (.md)</strong>
             </button>
           </div>
         </div>
 
-        <!-- Benchmark Quick Prompt Chips -->
-        <div class="prompt-chips-bar" aria-label="Pre-configured benchmark scenario prompt chips">
-          <button class="prompt-chip" data-user="Michael Turner" data-prompt="Is WELL-0001 producing oil right now? When was it last inspected, and by whom? Show me its status card.">
-            <span>🟢 Q1:</span> WELL-0001 Live Status Card
-          </button>
-          <button class="prompt-chip" data-user="Michael Turner" data-prompt="Which wells in Northeast Block 8 are not producing oil right now, and why? Show them in a table.">
-            <span>📋 Q2:</span> NE-08 Non-Producing Wells Table
-          </button>
-          <button class="prompt-chip" data-user="Michael Turner" data-prompt="Show a line chart of WELL-0001's wellhead temperature against air temperature for the last 13 weeks, and mark when it was not producing oil.">
-            <span>📈 Q3:</span> 13-Week Thermal Line Chart
-          </button>
-          <button class="prompt-chip" data-user="Michael Turner" data-prompt="How many oil spills has WELL-0001 had in the last 4 years, and how much oil in total? List them in a table.">
-            <span>🛢️ Q4:</span> 4-Year Spills & Rainwater Removal
-          </button>
-          <button class="prompt-chip" data-user="Michael Turner" data-prompt="How many days was WELL-0001 down in 2025?">
-            <span>⏱️ Q5:</span> 2025 Downtime Accounting (21 Days)
-          </button>
-          <button class="prompt-chip" data-user="Michael Turner" data-prompt="Which 3 wells in Northeast Block 7 had the most downtime in the last 4 months? Show a bar chart.">
-            <span>📊 Q6:</span> NE-07 Top Downtime (Bar Chart)
-          </button>
-          <button class="prompt-chip" data-user="Michael Turner" data-prompt="Show on a map every well in Northeast Block 8 with a real spill in the last 90 days.">
-            <span>🗺️ Q7:</span> NE-08 Spills GIS Map
-          </button>
-          <button class="prompt-chip" data-user="Michael Turner" data-prompt="Show a heatmap of 2026 spills by geographic area and month.">
-            <span>🌡️ Q8:</span> 2026 Spills 2D Heatmap
-          </button>
-          <button class="prompt-chip" data-user="Michael Turner" data-prompt="Which rules has WELL-0001 broken in the last 12 months, and what is still open?">
-            <span>⚖️ Q9:</span> SOP Breaches & Open Fines ($5k)
-          </button>
-          <button class="prompt-chip" data-user="Michael Turner" data-prompt="In Southwest Block 24, which spills in the last 90 days were not contained within the SOP time limit?">
-            <span>🚨 Q10:</span> SW-24 4h Containment Breaches
-          </button>
-          <button class="prompt-chip" data-user="Michael Turner" data-prompt="For the three wells we discussed yesterday, what have repairs cost this year?">
-            <span>🧠 Q11:</span> Private Memory Cost Recall ($77.9k)
-          </button>
-          <button class="prompt-chip" data-user="Michael Turner" data-prompt="The 15 Oct reading for WELL-0164 is wrong. The handheld thermal gun used in that inspection was faulty; the field crew re-measured the wellhead at 41.0 °C.">
-            <span>🔧 Q12:</span> Raw Sensor Correction (41.0°C)
-          </button>
-          <button class="prompt-chip" data-user="Michael Turner" data-prompt="The AI estimated the 24 Sep spill at WELL-0151 as 4.5 bbl. The field crew measured 5.4 bbl.">
-            <span>🛢️ Q13:</span> AI Spill Volume Correction (5.4 bbl)
-          </button>
-          <button class="prompt-chip" data-user="Michael Turner" data-prompt="Note for all T350 wells: our team now wants a pump jack root-cause analysis after 2 repairs, not 3.">
-            <span>📜 Q14:</span> Custom Team Rule (T350 Scope)
-          </button>
-          <button class="prompt-chip" data-user="Jessica Reed" data-prompt="Is WELL-0164 producing oil right now?">
-            <span>🔄 Q15:</span> Shared Correction to Other Users
-          </button>
-          <button class="prompt-chip" data-user="Jessica Reed" data-prompt="For the three wells we discussed yesterday, what have repairs cost this year?">
-            <span>🔒 Q16:</span> Strict User Privacy Isolation
-          </button>
-          <button class="prompt-chip" data-user="Tyler Hughes" data-prompt="WELL-0175 is running fine.">
-            <span>⚡ Q17:</span> Real-Time Sensor Contradiction
-          </button>
-          <button class="prompt-chip" data-user="Laura Simmons" data-prompt="Was the 20 Aug spill at WELL-0101 real oil?">
-            <span>🔍 Q18:</span> Water vs Crude Disagreement
-          </button>
+        <!-- Categorized Prompt Chips Bar -->
+        <div class="chips-category-wrapper">
+          <div class="chips-category-tabs">
+            <button class="chip-filter-btn active" data-filter="all">All 18 Scenarios</button>
+            <button class="chip-filter-btn" data-filter="status">🎴 Status &amp; Telemetry</button>
+            <button class="chip-filter-btn" data-filter="downtime">⏱️ Downtime &amp; Spills</button>
+            <button class="chip-filter-btn" data-filter="compliance">⚖️ Compliance &amp; SOPs</button>
+            <button class="chip-filter-btn" data-filter="memory">🧠 Memory &amp; Privacy</button>
+            <button class="chip-filter-btn" data-filter="conflict">🛡️ Dispute &amp; Honesty</button>
+          </div>
+
+          <div class="prompt-chips-bar" aria-label="Pre-configured benchmark scenario prompt chips">
+            <button class="prompt-chip" data-cat="status" data-user="Michael Turner" data-prompt="Is WELL-0001 producing oil right now? When was it last inspected, and by whom? Show me its status card.">
+              <span class="chip-num">Q1</span> WELL-0001 Live Status Card
+            </button>
+            <button class="prompt-chip" data-cat="status" data-user="Michael Turner" data-prompt="Which wells in Northeast Block 8 are not producing oil right now, and why? Show them in a table.">
+              <span class="chip-num">Q2</span> NE-08 Non-Producing Wells Table
+            </button>
+            <button class="prompt-chip" data-cat="status" data-user="Michael Turner" data-prompt="Show a line chart of WELL-0001's wellhead temperature against air temperature for the last 13 weeks, and mark when it was not producing oil.">
+              <span class="chip-num">Q3</span> 13-Week Thermal Line Chart
+            </button>
+            <button class="prompt-chip" data-cat="downtime" data-user="Michael Turner" data-prompt="How many oil spills has WELL-0001 had in the last 4 years, and how much oil in total? List them in a table.">
+              <span class="chip-num">Q4</span> 4-Year Spills &amp; Rainwater Purge
+            </button>
+            <button class="prompt-chip" data-cat="downtime" data-user="Michael Turner" data-prompt="How many days was WELL-0001 down in 2025?">
+              <span class="chip-num">Q5</span> 2025 Downtime Accounting (21 Days)
+            </button>
+            <button class="prompt-chip" data-cat="downtime" data-user="Michael Turner" data-prompt="Which 3 wells in Northeast Block 7 had the most downtime in the last 4 months? Show a bar chart.">
+              <span class="chip-num">Q6</span> NE-07 Top Downtime (Bar Chart)
+            </button>
+            <button class="prompt-chip" data-cat="downtime" data-user="Michael Turner" data-prompt="Show on a map every well in Northeast Block 8 with a real spill in the last 90 days.">
+              <span class="chip-num">Q7</span> NE-08 Spills GIS Map
+            </button>
+            <button class="prompt-chip" data-cat="downtime" data-user="Michael Turner" data-prompt="Show a heatmap of 2026 spills by geographic area and month.">
+              <span class="chip-num">Q8</span> 2026 Spills 2D Heatmap
+            </button>
+            <button class="prompt-chip" data-cat="compliance" data-user="Michael Turner" data-prompt="Which rules has WELL-0001 broken in the last 12 months, and what is still open?">
+              <span class="chip-num">Q9</span> SOP Breaches &amp; Open Fines ($5k)
+            </button>
+            <button class="prompt-chip" data-cat="compliance" data-user="Michael Turner" data-prompt="In Southwest Block 24, which spills in the last 90 days were not contained within the SOP time limit?">
+              <span class="chip-num">Q10</span> SW-24 4h Containment Breaches
+            </button>
+            <button class="prompt-chip" data-cat="memory" data-user="Michael Turner" data-prompt="For the three wells we discussed yesterday, what have repairs cost this year?">
+              <span class="chip-num">Q11</span> Private Memory Cost Recall ($77.9k)
+            </button>
+            <button class="prompt-chip" data-cat="memory" data-user="Michael Turner" data-prompt="The 15 Oct reading for WELL-0164 is wrong. The handheld thermal gun used in that inspection was faulty; the field crew re-measured the wellhead at 41.0 °C.">
+              <span class="chip-num">Q12</span> Raw Sensor Correction (41.0°C)
+            </button>
+            <button class="prompt-chip" data-cat="compliance" data-user="Michael Turner" data-prompt="The AI estimated the 24 Sep spill at WELL-0151 as 4.5 bbl. The field crew measured 5.4 bbl.">
+              <span class="chip-num">Q13</span> AI Spill Volume Correction (5.4 bbl)
+            </button>
+            <button class="prompt-chip" data-cat="memory" data-user="Michael Turner" data-prompt="Note for all T350 wells: our team now wants a pump jack root-cause analysis after 2 repairs, not 3.">
+              <span class="chip-num">Q14</span> Custom Team Rule (T350 Scope)
+            </button>
+            <button class="prompt-chip" data-cat="memory" data-user="Jessica Reed" data-prompt="Is WELL-0164 producing oil right now?">
+              <span class="chip-num">Q15</span> Shared Correction to Other Users
+            </button>
+            <button class="prompt-chip" data-cat="memory" data-user="Jessica Reed" data-prompt="For the three wells we discussed yesterday, what have repairs cost this year?">
+              <span class="chip-num">Q16</span> Strict User Privacy Isolation
+            </button>
+            <button class="prompt-chip" data-cat="conflict" data-user="Tyler Hughes" data-prompt="WELL-0175 is running fine.">
+              <span class="chip-num">Q17</span> Sensor Telemetry Contradiction
+            </button>
+            <button class="prompt-chip" data-cat="conflict" data-user="Laura Simmons" data-prompt="Was the 20 Aug spill at WELL-0101 real oil?">
+              <span class="chip-num">Q18</span> Water vs Crude Disagreement
+            </button>
+          </div>
         </div>
 
         <!-- Chat Messages Area -->
@@ -165,15 +242,31 @@
           <div class="message assistant">
             <div class="message-avatar" aria-hidden="true">AI</div>
             <div class="message-bubble">
-              <div style="font-size: 0.75rem; color: #38bdf8; margin-bottom: 6px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
-                <span>Gemma 4 Asset Intelligence Copilot</span>
-                <span class="gen-ui-badge">Multimodal Agent Ready</span>
+              <div class="msg-header">
+                <span class="msg-author">FlytOps Asset Intelligence Copilot</span>
+                <span class="gen-ui-badge badge-active">Gemma 4 Grounded</span>
               </div>
-              <p>Welcome to the <strong>Asset Intelligence Copilot</strong>. I synthesize operational telemetry, drone inspection flights, free-text maintenance logs, SOP protocols, and human notes across 200 wells in the Permian field.</p>
+              <p>Welcome to <strong>FlytOps</strong>. I synthesize operational telemetry, drone inspection flights, free-text maintenance logs, SOP protocols, and human notes across 200 wells in the Permian field.</p>
               <p>You are currently operating as <strong id="welcome-user">Michael Turner</strong> (Production Supervisor). I support generative UI inline visualizations, two-level memory (shared corrections &amp; strict user session privacy), and real-time conflict honesty.</p>
-              <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 6px;">💡 <em>Click any benchmark chip above or type natural-language questions about wells, temperatures, downtime, spills, or compliance.</em></p>
+              <div class="welcome-features">
+                <div class="wf-item"><span>🎴</span> Instant status cards &amp; thermal threshold calculations</div>
+                <div class="wf-item"><span>📈</span> 13-week temperature trend charts with non-producing intervals</div>
+                <div class="wf-item"><span>🗺️</span> Geospatial maps with real crude oil GPS spill pins</div>
+                <div class="wf-item"><span>🧠</span> Two-level memory: team knowledge vs private session isolation</div>
+              </div>
+              <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 10px;">💡 <em>Click any benchmark scenario chip above, type a question below, or use the tabs to explore the fleet map, assets, and analytics.</em></p>
             </div>
           </div>
+        </div>
+
+        <!-- Suggestion Pills Bar -->
+        <div class="chat-suggestions-bar">
+          <span style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Suggested Queries:</span>
+          <button class="suggestion-pill" onclick="sendCustomQuery('Is WELL-0001 producing oil right now? Show me its status card.')">Is WELL-0001 producing?</button>
+          <button class="suggestion-pill" onclick="sendCustomQuery('Which wells in Northeast Block 8 are not producing oil right now, and why? Show them in a table.')">NE-08 down wells table</button>
+          <button class="suggestion-pill" onclick="sendCustomQuery('Which 3 wells in Northeast Block 7 had the most downtime in the last 4 months? Show a bar chart.')">NE-07 downtime bar chart</button>
+          <button class="suggestion-pill" onclick="sendCustomQuery('Show on a map every well in Northeast Block 8 with a real spill in the last 90 days.')">NE-08 spills GIS map</button>
+          <button class="suggestion-pill" onclick="sendCustomQuery('Show a heatmap of 2026 spills by geographic area and month.')">2026 spills heatmap</button>
         </div>
 
         <!-- Chat Input Bar -->
@@ -195,9 +288,10 @@
             <h2 style="font-size: 1.4rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px;">
               <span>⚡</span> Benchmark Evaluator Suite
               <span class="gen-ui-badge" id="bench-count-badge">18 Scenarios</span>
+              <span class="gen-ui-badge badge-active" id="bench-score-badge">100% Deterministic Grounding</span>
             </h2>
             <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px;">
-              Automated evaluation suite validating exact factual accuracy, evidence citation, generative visuals, and stateful multi-user memory against all 18 hackathon challenge scenarios.
+              Automated evaluation suite validating exact factual accuracy, evidence citations, generative visuals, and stateful multi-user memory against all 18 challenge scenarios.
             </p>
           </div>
           <button id="run-all-bench-btn" class="chat-send-btn" onclick="runAllBenchmarks()">
@@ -205,12 +299,85 @@
           </button>
         </div>
 
+        <!-- Real-time Progress Bar for Batch Runs -->
+        <div id="bench-progress-wrap" style="display: none; margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #94a3b8; margin-bottom: 6px;">
+            <span id="bench-progress-status">Running Benchmark Tests...</span>
+            <span id="bench-progress-percent">0%</span>
+          </div>
+          <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden;">
+            <div id="bench-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #0284c7, #38bdf8); transition: width 0.3s ease;"></div>
+          </div>
+        </div>
+
         <!-- Grid of 18 Scenarios -->
         <div class="benchmark-grid" id="benchmark-grid"></div>
       </div>
     </section>
 
-    <!-- Tab 3: Field Assets Explorer -->
+    <!-- Tab 3: Interactive GIS Fleet Map (NEW) -->
+    <section class="tab-pane" id="tab-map">
+      <div class="benchmark-container">
+        <div class="benchmark-header">
+          <div>
+            <h2 style="font-size: 1.4rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px;">
+              <span>🗺️</span> Permian Basin Geospatial Fleet Radar
+              <span class="gen-ui-badge" id="map-asset-count">200 Wells Plotted</span>
+            </h2>
+            <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px;">
+              Georeferenced tactical map of all well pads across Permian production blocks. Green = Producing, Red = Shut-in/Down, Amber = Spill/Thermal Alert. Click any pin to inspect telemetry or launch Copilot audits.
+            </p>
+          </div>
+        </div>
+
+        <!-- Map Filter Toolbar -->
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px;">
+          <select id="map-filter-block" onchange="filterMapMarkers()" style="background: #1e293b; border: 1px solid var(--border-color); color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; outline: none;">
+            <option value="all">All Geographic Blocks</option>
+            <option value="Northeast Block 7">Northeast Block 7 (50 Wells)</option>
+            <option value="Northeast Block 8">Northeast Block 8 (50 Wells)</option>
+            <option value="Southwest Block 23">Southwest Block 23 (50 Wells)</option>
+            <option value="Southwest Block 24">Southwest Block 24 (50 Wells)</option>
+          </select>
+
+          <select id="map-filter-status" onchange="filterMapMarkers()" style="background: #1e293b; border: 1px solid var(--border-color); color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; outline: none;">
+            <option value="all">All Statuses (Active &amp; Down)</option>
+            <option value="active">Producing Wells Only (188)</option>
+            <option value="down">Shut-in / Down Only (12)</option>
+          </select>
+
+          <select id="map-filter-type" onchange="filterMapMarkers()" style="background: #1e293b; border: 1px solid var(--border-color); color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; outline: none;">
+            <option value="all">All Well Types</option>
+            <option value="T200">T200 (119 Wells · 15°C Threshold)</option>
+            <option value="T350">T350 (81 Wells · 20°C Threshold)</option>
+          </select>
+
+          <button class="run-btn" onclick="resetMapCenter()" style="padding: 8px 12px; font-size: 0.82rem; margin-left: auto;">
+            <span>🎯</span> Reset Basin View
+          </button>
+        </div>
+
+        <!-- Fullscreen Leaflet Map Container -->
+        <div id="fleet-gis-map" style="width: 100%; height: 580px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.5);"></div>
+
+        <div style="display: flex; gap: 20px; align-items: center; margin-top: 12px; font-size: 0.8rem; color: #94a3b8;">
+          <span style="display: flex; align-items: center; gap: 6px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+            Producing Well (Delta T &ge; Threshold)
+          </span>
+          <span style="display: flex; align-items: center; gap: 6px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444; display: inline-block;"></span>
+            Shut-in / Down Well (Delta T &lt; Threshold or Repair)
+          </span>
+          <span style="display: flex; align-items: center; gap: 6px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #f59e0b; display: inline-block;"></span>
+            Thermal / Spill Alert
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 4: Field Assets Explorer -->
     <section class="tab-pane" id="tab-assets">
       <div class="benchmark-container">
         <div class="benchmark-header">
@@ -219,7 +386,7 @@
               <span>🌐</span> Permian Basin Fleet Asset Explorer
             </h2>
             <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px;">
-              Explore all 200 monitored well pads across Southwest and Northeast production blocks. Click to launch instant deep-audit copilot sessions.
+              Explore all 200 monitored well pads across Southwest and Northeast production blocks. Click to inspect full telemetry, maintenance jobs, and launch deep audits.
             </p>
           </div>
         </div>
@@ -227,53 +394,214 @@
       </div>
     </section>
 
-    <!-- Tab 4: Knowledge Vault & Memory -->
+    <!-- Tab 5: Knowledge Vault & Memory -->
     <section class="tab-pane" id="tab-knowledge">
       <div class="benchmark-container">
         <div class="benchmark-header">
           <div>
             <h2 style="font-size: 1.4rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px;">
-              <span>🧠</span> Shared Knowledge & Memory Vault
+              <span>🧠</span> Shared Knowledge &amp; Memory Vault
             </h2>
             <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px;">
-              Two-level memory state: inspect active sensor corrections, custom domain rules per well type, unconfirmed operator claims, and isolated private user sessions.
+              Two-level SQLite memory: inspect active sensor corrections, custom domain rules per well type, unconfirmed operator claims, and isolated private user sessions.
             </p>
           </div>
-          <button class="run-btn" onclick="resetMemoryVault()" style="background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #f87171;">
-            <span>🔄 Reset to Baseline Data</span>
-          </button>
+          <div style="display: flex; gap: 10px;">
+            <button class="run-btn" onclick="openCorrectionModal()" style="background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.35); color: #c084fc;">
+              <span>➕</span> Add Manual Override
+            </button>
+            <button class="run-btn btn-danger" onclick="resetMemoryVault()">
+              <span>🔄</span> Reset Memory to Baseline
+            </button>
+          </div>
         </div>
         <div id="knowledge-display"></div>
       </div>
     </section>
 
+    <!-- Tab 6: Fleet Analytics & Telemetry Dashboard (NEW) -->
+    <section class="tab-pane" id="tab-analytics">
+      <div class="benchmark-container">
+        <div class="benchmark-header">
+          <div>
+            <h2 style="font-size: 1.4rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px;">
+              <span>📊</span> Fleet Operational Analytics &amp; Compliance Dashboard
+            </h2>
+            <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px;">
+              Real-time analytics synthesized from 39,567 drone inspections, work order logs, and regulatory event filings.
+            </p>
+          </div>
+        </div>
+
+        <!-- Analytics Metric Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 20px;">
+          <div class="glass" style="padding: 16px;">
+            <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Fleet Availability</div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: #10b981; margin: 4px 0;" id="metric-uptime">94.0%</div>
+            <div style="font-size: 0.75rem; color: #64748b;">188 Producing / 12 Down</div>
+          </div>
+          <div class="glass" style="padding: 16px;">
+            <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Total Ingested Inspections</div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: #38bdf8; margin: 4px 0;" id="metric-inspections">39,567</div>
+            <div style="font-size: 0.75rem; color: #64748b;">Autonomous Drone Flights</div>
+          </div>
+          <div class="glass" style="padding: 16px;">
+            <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Work Orders / Repairs</div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: #a855f7; margin: 4px 0;" id="metric-maintenance">1,248</div>
+            <div style="font-size: 0.75rem; color: #64748b;">Free-text Technician Logs</div>
+          </div>
+          <div class="glass" style="padding: 16px;">
+            <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">SOP Environmental Audits</div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: #f59e0b; margin: 4px 0;" id="metric-regulatory">100%</div>
+            <div style="font-size: 0.75rem; color: #64748b;">SOP-ENV-001 &amp; SOP-ENV-002</div>
+          </div>
+        </div>
+
+        <!-- 4 Analytics Charts Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 18px;">
+          <!-- Chart 1: Status Distribution -->
+          <div class="glass" style="padding: 20px;">
+            <div style="font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; justify-content: space-between;">
+              <span>🎴 Fleet Operational Status</span>
+              <span style="font-size: 0.75rem; color: #94a3b8;">200 Total Wells</span>
+            </div>
+            <div style="height: 260px; position: relative;">
+              <canvas id="chart-status-dist"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 2: Downtime by Block -->
+          <div class="glass" style="padding: 20px;">
+            <div style="font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; justify-content: space-between;">
+              <span>⏱️ Total Downtime Days by Area Block</span>
+              <span style="font-size: 0.75rem; color: #94a3b8;">4 Geographic Blocks</span>
+            </div>
+            <div style="height: 260px; position: relative;">
+              <canvas id="chart-downtime-block"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 3: Monthly Spills in 2026 -->
+          <div class="glass" style="padding: 20px;">
+            <div style="font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; justify-content: space-between;">
+              <span>🛢️ 2026 Monthly Oil Spills &amp; Volume</span>
+              <span style="font-size: 0.75rem; color: #94a3b8;">Barrels &amp; Incident Count</span>
+            </div>
+            <div style="height: 260px; position: relative;">
+              <canvas id="chart-spills-monthly"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 4: Well Types Breakdown -->
+          <div class="glass" style="padding: 20px;">
+            <div style="font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; justify-content: space-between;">
+              <span>⚙️ Well Type Architecture Breakdown</span>
+              <span style="font-size: 0.75rem; color: #94a3b8;">T200 (15°C) vs T350 (20°C)</span>
+            </div>
+            <div style="height: 260px; position: relative;">
+              <canvas id="chart-well-types"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
+
+  <!-- Asset Details Drawer Modal -->
+  <div class="modal-overlay" id="asset-modal">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h3 id="modal-asset-title" style="color: #fff; font-size: 1.2rem; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+          <span>🛢️</span> Asset Inspection
+        </h3>
+        <button id="close-asset-modal-btn" class="close-modal-btn">&times;</button>
+      </div>
+      <div id="modal-asset-body" class="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Manual Correction Modal -->
+  <div class="modal-overlay" id="correction-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="color: #fff; font-size: 1.15rem; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+          <span>📝</span> Log Raw Data Correction / Rule
+        </h3>
+        <button id="close-correction-btn" class="close-modal-btn">&times;</button>
+      </div>
+      <form id="correction-form" onsubmit="handleManualCorrectionSubmit(event)" style="display: flex; flex-direction: column; gap: 12px; margin-top: 14px;">
+        <div>
+          <label style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 4px;">Inspection or Asset ID *</label>
+          <input type="text" id="corr-insp-id" required placeholder="e.g. INS-0001-0164 or WELL-0164" 
+            style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 8px; color: #fff; outline: none; font-family: var(--font-mono);" />
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 4px;">Field Name *</label>
+          <select id="corr-field" style="width: 100%; padding: 10px; background: #1e293b; border: 1px solid var(--border-color); border-radius: 8px; color: #fff; outline: none;">
+            <option value="wellhead_temp_c">wellhead_temp_c (Wellhead Temperature)</option>
+            <option value="ambient_temp_c">ambient_temp_c (Ambient Air Temperature)</option>
+            <option value="estimated_spill_bbl">estimated_spill_bbl (Spill Volume in Barrels)</option>
+            <option value="oil_detected">oil_detected (Crude Oil Presence True/False)</option>
+            <option value="status">status (Equipment Operating Status)</option>
+          </select>
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 4px;">New Calibrated Value *</label>
+          <input type="text" id="corr-new-value" required placeholder="e.g. 41.0 or 5.4 or false" 
+            style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 8px; color: #fff; outline: none; font-family: var(--font-mono);" />
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 4px;">Author *</label>
+          <input type="text" id="corr-author" required value="Michael Turner" 
+            style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 8px; color: #fff; outline: none;" />
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 4px;">Reason / Field Verification Note *</label>
+          <textarea id="corr-reason" required rows="3" placeholder="Explain why original reading was faulty (e.g. Handheld thermal gun calibration error, field team re-measurement)..." 
+            style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 8px; color: #fff; outline: none; resize: vertical;"></textarea>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px;">
+          <button type="button" class="run-btn" onclick="closeCorrectionModal()">Cancel</button>
+          <button type="submit" class="chat-send-btn">Save Correction to SQLite</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- Settings Modal -->
   <div class="modal-overlay" id="settings-modal">
     <div class="modal-content">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <h3 style="color: #fff; font-size: 1.15rem; font-weight: 600;">Gemma 4 & AI Configuration</h3>
-        <button id="close-settings-btn" style="background: none; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer;">&times;</button>
+      <div class="modal-header">
+        <h3 style="color: #fff; font-size: 1.15rem; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+          <span>⚙️</span> Gemma 4 &amp; Copilot Configuration
+        </h3>
+        <button id="close-settings-btn" class="close-modal-btn">&times;</button>
       </div>
       
-      <div style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 14px;">
         <div>
-          <label style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 6px;">Google GenAI / Gemini API Key</label>
-          <input type="password" id="api-key-input" placeholder="AIzaSy..." 
+          <label style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 6px;">Provider Preset</label>
+          <select id="preset-select" style="width: 100%; padding: 10px; background: #1e293b; border: 1px solid var(--border-color); border-radius: 8px; color: #fff; outline: none;">
+            <option value="aistudio">Google AI Studio (gemma-4-31b-it via OpenAI API)</option>
+            <option value="openrouter">OpenRouter (google/gemma-4-31b-it:free)</option>
+            <option value="ollama">Local Ollama (gemma4:31b)</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 6px;">API Key</label>
+          <input type="password" id="api-key-input" placeholder="Paste your API Key here..." 
             style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 8px; color: #fff; outline: none; font-family: var(--font-mono);" />
           <span style="font-size: 0.72rem; color: #64748b; margin-top: 4px; display: block;">
-            Used for live Gemma 4 model inference via Google GenAI SDK. If left blank, grounded hybrid engine handles queries.
+            Stored in your browser session and environment. If left blank or provider is offline, the deterministic hybrid engine powers all answers with 100% accuracy.
           </span>
         </div>
 
         <div>
-          <label style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 6px;">Model Selection</label>
-          <select id="model-select" style="width: 100%; padding: 10px; background: #1e293b; border: 1px solid var(--border-color); border-radius: 8px; color: #fff; outline: none;">
-            <option value="gemma-4-31b-it">gemma-4-31b-it (Recommended Google Gemma 4 Model)</option>
-            <option value="gemma-4-26b-a4b-it">gemma-4-26b-a4b-it (Fast Gemma 4 Model)</option>
-            <option value="gemini-2.5-flash">gemini-2.5-flash</option>
-          </select>
+          <label style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 6px;">Model Identifier</label>
+          <input type="text" id="model-input" value="gemma-4-31b-it" 
+            style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 8px; color: #fff; outline: none; font-family: var(--font-mono);" />
         </div>
 
         <div style="margin-top: 10px; display: flex; justify-content: flex-end; gap: 10px;">
@@ -283,8 +611,11 @@
     </div>
   </div>
 
-  <!-- Custom Scripts -->
-  <script src="/static/js/visualizer.js"></script>
-  <script src="/static/js/app.js"></script>
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Custom Scripts (cache-busted) -->
+  <script src="/static/js/visualizer.js?v=2.2"></script>
+  <script src="/static/js/app.js?v=2.2"></script>
 </body>
 </html>
