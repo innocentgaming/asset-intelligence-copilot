@@ -55,6 +55,24 @@ def init_app(data_paths):
     engine = AnalyticsEngine(indexer=indexer, memory=memory)
     agent = Agent(indexer=indexer, memory=memory)
 
+@app.on_event("startup")
+def startup_event():
+    global indexer
+    if indexer is None:
+        custom_data = os.environ.get("COPILOT_DATA_PATH") or os.environ.get("DATA_PATH")
+        data_paths = [custom_data] if custom_data else [DEFAULT_DATA]
+        init_app(data_paths)
+
+@app.get("/health")
+@app.get("/api/health")
+def health_check():
+    return {
+        "status": "healthy",
+        "service": "FlytOps Asset Intelligence Copilot",
+        "version": "2.0.0",
+        "timestamp": datetime.utcnow().isoformat() + "Z"
+    }
+
 class ChatRequest(BaseModel):
     user_name: Optional[str] = None
     user_id: Optional[str] = None
@@ -724,7 +742,7 @@ def main():
         help="Path(s) to dataset folder(s), e.g. --data ds/sample-data"
     )
     parser.add_argument("--host", default="0.0.0.0", help="Host interface to bind (default 0.0.0.0)")
-    parser.add_argument("--port", type=int, default=8000, help="Port to bind (default 8000)")
+    parser.add_argument("--port", type=int, default=int(os.environ.get("PORT", 8000)), help="Port to bind (default 8000 or $PORT)")
     args = parser.parse_args()
 
     print("=" * 75)

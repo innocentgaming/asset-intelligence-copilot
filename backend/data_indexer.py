@@ -14,13 +14,13 @@ from collections import defaultdict
 from typing import Dict, List, Any, Optional, Union
 
 class DataIndexer:
-    def __init__(self, data_root: Union[str, List[str]] = "d:/hacknewalone/dataset/sample-data"):
+    def __init__(self, data_root: Union[str, List[str]] = "dataset/sample-data"):
         if isinstance(data_root, list):
             self.data_roots = [os.path.abspath(p) for p in data_root if p]
         else:
             self.data_roots = [os.path.abspath(data_root)]
         
-        self.data_root = self.data_roots[0] if self.data_roots else os.path.abspath("d:/hacknewalone/dataset/sample-data")
+        self.data_root = self.data_roots[0] if self.data_roots else os.path.abspath("dataset/sample-data")
 
         self.areas: Dict[str, Any] = {}
         self.teams: Dict[str, Any] = {}

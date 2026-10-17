@@ -33,7 +33,10 @@ app.add_middleware(
 )
 
 # Global instances
-DATA_DIR = os.path.abspath("d:/hacknewalone/dataset/sample-data")
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+DATA_DIR = os.path.join(REPO_ROOT, "dataset", "sample-data")
+if not os.path.exists(DATA_DIR):
+    DATA_DIR = os.path.join(REPO_ROOT, "ds", "sample-data")
 indexer = DataIndexer(data_root=DATA_DIR)
 memory = MemoryManager()
 copilot = GemmaCopilot(indexer=indexer, memory=memory)
@@ -416,7 +419,7 @@ def run_benchmark(scenario_id: str):
     }
 
 # Mount static frontend
-frontend_dir = os.path.abspath("d:/hacknewalone/frontend")
+frontend_dir = os.path.join(REPO_ROOT, "frontend")
 if os.path.exists(frontend_dir):
     app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
 

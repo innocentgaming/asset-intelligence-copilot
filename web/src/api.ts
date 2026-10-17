@@ -6,7 +6,7 @@ import {
   Visual,
 } from './types';
 
-const BASE_URL = '';
+const BASE_URL = (((import.meta as any).env?.VITE_API_URL as string) || '').replace(/\/$/, '');
 
 export async function fetchUserMeta(): Promise<UserMetaResponse> {
   const res = await fetch(`${BASE_URL}/api/users`);

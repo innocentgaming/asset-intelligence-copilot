@@ -329,6 +329,12 @@ python -m streamlit run streamlit_app.py
 ```
 Open **`http://localhost:8501`** in your browser.
 
+#### Option D: Cloud Deployment (Render & Vercel)
+See the complete [**Deployment Guide**](DEPLOYMENT.md) for:
+- **1-Click Render Blueprint:** Deploy full-stack FastAPI + React + Dataset via [`render.yaml`](render.yaml).
+- **Production Container:** Pre-configured multi-stage [`Dockerfile`](Dockerfile) with health check endpoints.
+- **Vercel Edge SPA:** Deploy the decoupled Vite React UI using [`vercel.json`](vercel.json).
+
 ---
 
 ## 10. Evaluation Rubric & Focus Areas

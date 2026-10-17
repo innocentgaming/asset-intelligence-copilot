@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: asset-intelligence-copilot
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: COPILOT_PRESET
+        value: aistudio
+      - key: COPILOT_MODEL
+        value: gemma-4-31b-it
+      - key: COPILOT_API_KEY
+        sync: false
+      - key: PYTHONUNBUFFERED
+        value: "1"
