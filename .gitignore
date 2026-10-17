@@ -12,3 +12,5 @@ venv/
 copilot_memory.db
 .DS_Store
 Thumbs.db
+ds/
+.pytest_cache/
