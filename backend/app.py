@@ -112,7 +112,11 @@ def list_wells():
 
 @app.get("/api/well/{well_id}")
 def get_well_details(well_id: str):
-    well_id = well_id.upper()
+    well_id = well_id.strip().upper()
+    import re
+    if not re.match(r"^WELL-\d{4}$", well_id):
+        raise HTTPException(status_code=400, detail="Invalid well ID format. Expected 'WELL-XXXX'")
+
     meta = indexer.wells_metadata.get(well_id)
     if not meta:
         raise HTTPException(status_code=404, detail="Well not found")
@@ -331,6 +335,11 @@ def get_benchmarks():
 
 @app.post("/api/benchmark/run/{scenario_id}")
 def run_benchmark(scenario_id: str):
+    scenario_id = scenario_id.strip().upper()
+    import re
+    if not re.match(r"^Q\d{1,2}$", scenario_id):
+        raise HTTPException(status_code=400, detail="Invalid scenario ID format. Expected 'Q1' to 'Q18'")
+
     scen = next((s for s in BENCHMARK_SCENARIOS if s["id"] == scenario_id), None)
     if not scen:
         raise HTTPException(status_code=404, detail="Benchmark scenario not found")

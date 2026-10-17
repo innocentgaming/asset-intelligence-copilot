@@ -15,7 +15,7 @@ import os
 import json
 import sqlite3
 from typing import Dict, List, Any, Optional, Tuple
-from datetime import datetime
+from datetime import datetime, timezone
 
 DEFAULT_DB_PATH = os.path.abspath("copilot_memory.db")
 
@@ -235,7 +235,7 @@ class MemoryManager:
 
     def add_correction(self, inspection_id: str, field: str, new_value: Any, original_value: Any, author: str, reason: str, well_id: Optional[str] = None):
         """Add a correction to raw data or AI analysis."""
-        created_at = datetime.utcnow().isoformat() + "Z"
+        created_at = datetime.now(timezone.utc).isoformat()
         self.corrections[inspection_id] = {
             "inspection_id": inspection_id,
             "well_id": well_id,
@@ -260,7 +260,7 @@ class MemoryManager:
 
     def set_type_rule(self, rule_name: str, well_type: str, threshold: Any, author: str, note: str):
         """Set a domain rule for a specific well type (e.g. T350 pump jack RCA trigger = 2)."""
-        created_at = datetime.utcnow().isoformat() + "Z"
+        created_at = datetime.now(timezone.utc).isoformat()
         if rule_name not in self.custom_rules:
             self.custom_rules[rule_name] = {"default": 3, "by_type": {}}
         self.custom_rules[rule_name]["by_type"][well_type] = {
@@ -288,7 +288,7 @@ class MemoryManager:
 
     def add_shared_note(self, well_id: str, text: str, author: str, valid_from: str, valid_to: Optional[str] = None):
         """Add a shared announcement or planned maintenance note."""
-        created_at = datetime.utcnow().isoformat() + "Z"
+        created_at = datetime.now(timezone.utc).isoformat()
         entry = {
             "asset_id": well_id,
             "text": text,
@@ -310,7 +310,7 @@ class MemoryManager:
         return [n for n in self.shared_notes if n.get("asset_id") == well_id]
 
     def add_unconfirmed_claim(self, well_id: str, claim: str, author: str, contradicting_evidence: str):
-        created_at = datetime.utcnow().isoformat() + "Z"
+        created_at = datetime.now(timezone.utc).isoformat()
         entry = {
             "asset_id": well_id,
             "claim": claim,
@@ -332,7 +332,7 @@ class MemoryManager:
 
     def log_user_message(self, user_key: str, role: str, content: str, entities: Optional[Dict[str, Any]] = None):
         user_key = user_key.lower().strip()
-        timestamp = datetime.utcnow().isoformat() + "Z"
+        timestamp = datetime.now(timezone.utc).isoformat()
         if user_key not in self.user_sessions:
             self.user_sessions[user_key] = []
         

@@ -23,9 +23,9 @@
 <body>
 
   <!-- Top Command Center Header -->
-  <header class="header">
+  <header role="banner" class="header">
     <div class="brand">
-      <div class="brand-icon">🛢️</div>
+      <div class="brand-icon" aria-hidden="true">🛢️</div>
       <div>
         <div class="brand-title">
           <span>FLYTOPS · ASSET INTELLIGENCE COPILOT</span>
@@ -39,18 +39,18 @@
 
     <!-- Navigation Tabs -->
     <div class="header-center">
-      <nav class="nav-tabs">
-        <button class="nav-tab active" data-tab="chat">
-          <span>💬</span> Copilot Chat
+      <nav role="tablist" aria-label="Copilot Navigation" class="nav-tabs">
+        <button role="tab" id="tab-btn-chat" aria-controls="tab-chat" aria-selected="true" class="nav-tab active" data-tab="chat">
+          <span aria-hidden="true">💬</span> Copilot Chat
         </button>
-        <button class="nav-tab" data-tab="benchmark">
-          <span>⚡</span> Benchmark Suite (Q1–Q18)
+        <button role="tab" id="tab-btn-benchmark" aria-controls="tab-benchmark" aria-selected="false" class="nav-tab" data-tab="benchmark">
+          <span aria-hidden="true">⚡</span> Benchmark Suite (Q1–Q18)
         </button>
-        <button class="nav-tab" data-tab="assets">
-          <span>🌐</span> Field Assets
+        <button role="tab" id="tab-btn-assets" aria-controls="tab-assets" aria-selected="false" class="nav-tab" data-tab="assets">
+          <span aria-hidden="true">🌐</span> Field Assets
         </button>
-        <button class="nav-tab" data-tab="knowledge">
-          <span>🧠</span> Knowledge Vault
+        <button role="tab" id="tab-btn-knowledge" aria-controls="tab-knowledge" aria-selected="false" class="nav-tab" data-tab="knowledge">
+          <span aria-hidden="true">🧠</span> Knowledge Vault
         </button>
       </nav>
     </div>
@@ -58,9 +58,9 @@
     <!-- User Persona Switcher & Settings -->
     <div class="header-right">
       <div class="user-selector-wrapper">
-        <div class="user-avatar" id="user-avatar-badge">MT</div>
+        <div class="user-avatar" id="user-avatar-badge" aria-hidden="true">MT</div>
         <div class="user-info">
-          <select id="user-select">
+          <select id="user-select" aria-label="Select active user persona">
             <option value="Michael Turner">Michael Turner (Prod. Supervisor)</option>
             <option value="Jessica Reed">Jessica Reed (Field Inspector)</option>
             <option value="Tyler Hughes">Tyler Hughes (Field Operator)</option>
@@ -71,38 +71,38 @@
         </div>
       </div>
 
-      <button id="open-settings-btn" class="run-btn" style="padding: 8px 12px; display: flex; align-items: center; gap: 6px;">
-        <span>⚙️</span> Config
+      <button id="open-settings-btn" class="run-btn" style="padding: 8px 12px; display: flex; align-items: center; gap: 6px;" aria-label="Open model and API settings configuration">
+        <span aria-hidden="true">⚙️</span> Config
       </button>
     </div>
   </header>
 
   <!-- Main Viewports -->
-  <main class="main-content">
+  <main role="main" class="main-content">
     
     <!-- Tab 1: Copilot Chat -->
-    <section class="tab-pane active" id="tab-chat">
+    <section role="tabpanel" id="tab-chat" aria-labelledby="tab-btn-chat" class="tab-pane active">
       <div class="chat-container">
         
         <!-- Chat Control Bar (New Chat, Reset Memory, Download Transcript) -->
         <div class="chat-toolbar" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--border-color); background: rgba(13, 21, 39, 0.5); border-radius: 12px 12px 0 0;">
           <div style="display: flex; gap: 8px; align-items: center;">
-            <button id="new-chat-btn" class="run-btn" style="padding: 6px 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px;" title="Start a fresh conversation thread">
-              <span>➕</span> <strong>New Chat</strong>
+            <button id="new-chat-btn" class="run-btn" style="padding: 6px 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px;" title="Start a fresh conversation thread" aria-label="Start a fresh conversation session">
+              <span aria-hidden="true">➕</span> <strong>New Chat</strong>
             </button>
-            <button id="reset-memory-btn" class="run-btn" style="padding: 6px 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.3); color: #f87171;" title="Reset shared corrections and practice runs">
-              <span>🔄</span> <strong>Reset Memory</strong>
+            <button id="reset-memory-btn" class="run-btn" style="padding: 6px 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.3); color: #f87171;" title="Reset shared corrections and practice runs" aria-label="Reset memory vault to initial baseline">
+              <span aria-hidden="true">🔄</span> <strong>Reset Memory</strong>
             </button>
           </div>
           <div style="display: flex; gap: 8px; align-items: center;">
-            <button id="export-transcript-btn" class="run-btn" style="padding: 6px 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.3); color: #38bdf8;" title="Export session transcript as Markdown">
-              <span>📥</span> <strong>Download Transcript (.md)</strong>
+            <button id="export-transcript-btn" class="run-btn" style="padding: 6px 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.3); color: #38bdf8;" title="Export session transcript as Markdown" aria-label="Download session transcript as Markdown file">
+              <span aria-hidden="true">📥</span> <strong>Download Transcript (.md)</strong>
             </button>
           </div>
         </div>
 
         <!-- Benchmark Quick Prompt Chips -->
-        <div class="prompt-chips-bar">
+        <div class="prompt-chips-bar" aria-label="Pre-configured benchmark scenario prompt chips">
           <button class="prompt-chip" data-user="Michael Turner" data-prompt="Is WELL-0001 producing oil right now? When was it last inspected, and by whom? Show me its status card.">
             <span>🟢 Q1:</span> WELL-0001 Live Status Card
           </button>
@@ -160,10 +160,10 @@
         </div>
 
         <!-- Chat Messages Area -->
-        <div class="chat-history" id="chat-history">
+        <div class="chat-history" id="chat-history" role="log" aria-live="polite" aria-label="Conversation message stream">
           <!-- Initial Assistant Welcome Message -->
           <div class="message assistant">
-            <div class="message-avatar">AI</div>
+            <div class="message-avatar" aria-hidden="true">AI</div>
             <div class="message-bubble">
               <div style="font-size: 0.75rem; color: #38bdf8; margin-bottom: 6px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
                 <span>Gemma 4 Asset Intelligence Copilot</span>
@@ -178,10 +178,10 @@
 
         <!-- Chat Input Bar -->
         <div class="chat-input-bar">
-          <input type="text" id="chat-input" class="chat-input" placeholder="Ask about well status, downtime, spills, SOP violations, or submit corrections..." />
-          <button id="send-btn" class="chat-send-btn">
+          <input type="text" id="chat-input" class="chat-input" placeholder="Ask about well status, downtime, spills, SOP violations, or submit corrections..." aria-label="Ask Copilot a question or submit field updates" />
+          <button id="send-btn" class="chat-send-btn" aria-label="Send message to Copilot">
             <span>Send</span>
-            <span>⚡</span>
+            <span aria-hidden="true">⚡</span>
           </button>
         </div>
       </div>

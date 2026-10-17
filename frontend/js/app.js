@@ -83,10 +83,14 @@ function initNavTabs() {
 function switchTab(tabId) {
   STATE.activeTab = tabId;
   document.querySelectorAll(".nav-tab").forEach(b => {
-    b.classList.toggle("active", b.getAttribute("data-tab") === tabId);
+    const isActive = b.getAttribute("data-tab") === tabId;
+    b.classList.toggle("active", isActive);
+    b.setAttribute("aria-selected", isActive ? "true" : "false");
   });
   document.querySelectorAll(".tab-pane").forEach(p => {
-    p.classList.toggle("active", p.id === `tab-${tabId}`);
+    const isActive = p.id === `tab-${tabId}`;
+    p.classList.toggle("active", isActive);
+    p.setAttribute("aria-hidden", isActive ? "false" : "true");
   });
 
   if (tabId === "benchmark") {
@@ -684,11 +688,15 @@ function showCitationPreview(citationText) {
 }
 
 // -------------------------------------------------------------
-// Formatting Helpers
+// Formatting Helpers & Security Sanitization
 // -------------------------------------------------------------
 function formatMarkdown(text) {
   if (!text) return "";
-  let html = text
+  // 1. Sanitize raw HTML to prevent XSS injection
+  let safe = escapeHTML(text);
+  
+  // 2. Format markdown bold, italic, code, linebreaks
+  let html = safe
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.*?)\*/g, "<em>$1</em>")
     .replace(/`([^`]+)`/g, "<code>$1</code>")
@@ -698,5 +706,11 @@ function formatMarkdown(text) {
 }
 
 function escapeHTML(str) {
-  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
