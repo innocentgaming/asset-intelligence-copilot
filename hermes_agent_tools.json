@@ -1,0 +1,119 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "get_well_status",
+      "description": "Assess current producing status from latest inspection thermal delta vs operating manual threshold. Flags stale status if recorded active but thermal reading indicates well is down.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "well_id": { "type": "string", "description": "Asset ID, e.g. WELL-0001" }
+        },
+        "required": ["well_id"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "get_down_wells_in_area",
+      "description": "List all wells in a geographic area or block (e.g. 'Northeast Block 8') that are currently not producing oil, along with delta above air, recorded status, and reasons.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "area_name": { "type": "string", "description": "e.g. 'Northeast Block 8', 'Northeast Block 7'" }
+        },
+        "required": ["area_name"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "get_well_temp_timeseries",
+      "description": "Weekly wellhead vs ambient temperature history for a well over N weeks with non-producing intervals marked.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "well_id": { "type": "string", "description": "Asset ID, e.g. WELL-0001" },
+          "weeks": { "type": "integer", "description": "Number of weeks, default 13" }
+        },
+        "required": ["well_id"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "get_well_spills_history",
+      "description": "Get confirmed spill history and total volume for a well, with rainwater/mud false positives excluded under SOP-SR Section 7.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "well_id": { "type": "string", "description": "Asset ID, e.g. WELL-0001" }
+        },
+        "required": ["well_id"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "get_well_downtime_in_year",
+      "description": "Calculate downtime days (exactly 7 days per non-producing inspection) and failure causes for a well in a year.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "well_id": { "type": "string", "description": "Asset ID, e.g. WELL-0001" },
+          "year": { "type": "string", "description": "Calendar year, e.g. '2025'" }
+        },
+        "required": ["well_id"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "get_top_downtime_wells",
+      "description": "Rank top wells in an area by cumulative downtime days over a given window.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "area_name": { "type": "string", "description": "e.g. 'Northeast Block 7'" },
+          "start_date": { "type": "string", "description": "YYYY-MM-DD" },
+          "end_date": { "type": "string", "description": "YYYY-MM-DD" },
+          "top_n": { "type": "integer", "description": "Number of top wells, default 3" }
+        },
+        "required": ["area_name"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "get_area_spills_map",
+      "description": "Retrieve GPS coordinates, spill volumes, and dates for recent spills in an area for Leaflet mapping.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "area_name": { "type": "string", "description": "e.g. 'Northeast Block 8'" },
+          "days": { "type": "integer", "description": "Days window, default 90" }
+        },
+        "required": ["area_name"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "get_spills_heatmap",
+      "description": "Generate a 2D matrix distribution of crude releases by area and calendar month.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "year": { "type": "string", "description": "Calendar year, default '2026'" }
+        }
+      }
+    }
+  }
+]

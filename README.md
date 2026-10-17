@@ -266,15 +266,40 @@ python tests/test_examples.py ds/sample-data
 python -m pytest tests/
 ```
 
-### 4. Configure Gemma 4 (Optional)
-Create a `.env` file in the root directory:
+### 4. Configure Gemma 4 & Agent Skills (Cloud or 100% Local Ollama)
+The Copilot natively integrates Google's **Gemma 4** family via the **Agent Skill Open Standard** (`SKILL.md`):
+
+#### Mode A: Google AI Studio (Cloud)
 ```ini
-# Preset options: aistudio | openrouter | ollama
 COPILOT_PRESET=aistudio
 COPILOT_API_KEY=YOUR_GEMINI_API_KEY
 COPILOT_MODEL=gemma-4-31b-it
 ```
-*(The copilot works with 100% accuracy out of the box using its local deterministic engine if no API key is set).*
+
+#### Mode B: 100% Local & Edge Execution via Ollama (No Cloud / Air-Gapped)
+```bash
+# Pull and run Gemma 4 locally
+ollama pull gemma4:31b
+ollama run gemma4:31b
+```
+Configure `.env`:
+```ini
+COPILOT_PRESET=ollama
+COPILOT_BASE_URL=http://localhost:11434/v1
+COPILOT_MODEL=gemma4:31b
+```
+*(For field laptops with $\le 16\text{ GB}$ VRAM, use `ollama run gemma4:9b` or `gemma4:e4b`)*.
+
+#### Verify Gemma 4 Connectivity:
+```powershell
+python scripts/test_gemma4_connection.py
+```
+
+#### Agent Skill Open Standard & Hermes Harness:
+- **`SKILL.md` & `.agents/skills/asset-intelligence-copilot/SKILL.md`:** Standardized declarative skill metadata, physics rules, and tool contracts.
+- **`hermes_agent_tools.json`:** Direct function definitions for the Nous Research Hermes Agent harness.
+- **Detailed Reference Guide:** See [`docs/agent_skills_and_gemma4_guide.md`](docs/agent_skills_and_gemma4_guide.md).
+*(The copilot works with 100% accuracy out of the box using its local deterministic engine even if no API key is provided).*
 
 ### 5. Launch Application
 #### Option A: FastAPI Production Server (Serves React 18 Console on `/` and Classic UI on `/classic`)

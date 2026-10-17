@@ -1,6 +1,6 @@
 import React from 'react';
 import { UserMetaResponse } from '../types';
-import { Sun, Moon, Database, Menu, BookOpen } from 'lucide-react';
+import { Sun, Moon, Database, Menu, BookOpen, Sparkles } from 'lucide-react';
 
 interface HeaderProps {
   meta: UserMetaResponse | null;
@@ -8,6 +8,7 @@ interface HeaderProps {
   onToggleTheme: () => void;
   onToggleSidebar: () => void;
   onOpenKnowledge: () => void;
+  onOpenSkillHub: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -16,6 +17,7 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleTheme,
   onToggleSidebar,
   onOpenKnowledge,
+  onOpenSkillHub,
 }) => {
   const wellsCount = meta?.wells ?? 200;
   const today = meta?.today ?? '2026-10-16';
@@ -44,8 +46,17 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Right controls: Knowledge Drawer & Theme Toggle */}
+      {/* Right controls: Skill Hub, Knowledge Drawer & Theme Toggle */}
       <div className="flex items-center gap-2">
+        <button
+          onClick={onOpenSkillHub}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-amber-300 light:text-amber-700 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition shadow-sm"
+          aria-label="Open Agent Skills and Gemma 4 Hub"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          <span className="hidden md:inline">Agent Skill & Gemma 4 Hub</span>
+        </button>
+
         <button
           onClick={onOpenKnowledge}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 light:text-slate-700 bg-industrial-900 hover:bg-industrial-800 light:bg-slate-100 light:hover:bg-slate-200 border border-industrial-800 light:border-slate-300 transition"

@@ -19,6 +19,7 @@ import { ChatThread } from './components/ChatThread';
 import { Composer } from './components/Composer';
 import { EmptyState } from './components/EmptyState';
 import { KnowledgeDrawer } from './components/KnowledgeDrawer';
+import { SkillModal } from './components/SkillModal';
 
 export const App: React.FC = () => {
   // Theme state (dark default)
@@ -39,6 +40,7 @@ export const App: React.FC = () => {
   // Drawer & Sidebar mobile state
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [isKnowledgeOpen, setIsKnowledgeOpen] = useState<boolean>(false);
+  const [isSkillHubOpen, setIsSkillHubOpen] = useState<boolean>(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -256,6 +258,7 @@ export const App: React.FC = () => {
           onToggleTheme={toggleTheme}
           onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           onOpenKnowledge={() => setIsKnowledgeOpen(true)}
+          onOpenSkillHub={() => setIsSkillHubOpen(true)}
         />
 
         {/* Scrollable Chat or Empty State */}
@@ -285,6 +288,12 @@ export const App: React.FC = () => {
       <KnowledgeDrawer
         isOpen={isKnowledgeOpen}
         onClose={() => setIsKnowledgeOpen(false)}
+      />
+
+      {/* Agent Skills & Gemma 4 Modal */}
+      <SkillModal
+        isOpen={isSkillHubOpen}
+        onClose={() => setIsSkillHubOpen(false)}
       />
     </div>
   );
