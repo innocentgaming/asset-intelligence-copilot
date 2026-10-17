@@ -1,301 +1,317 @@
-# Asset Intelligence Copilot (Gemma 4 Edition)
+# FlytOps: Asset Intelligence Copilot (Gemma 4 Edition)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-brightgreen.svg)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.40+-FF4B4B.svg)](https://streamlit.io)
 [![Gemma 4](https://img.shields.io/badge/Gemma_4-31B_IT_%2F_26B_A4B-8A2BE2.svg)](https://ai.google.dev/gemma)
-[![Benchmark](https://img.shields.io/badge/Benchmark-18%2F18_PASS_(100%25)-success.svg)](test_scripted_18_questions.py)
-[![WCAG 2.1 AA](https://img.shields.io/badge/Accessibility-WCAG_2.1_AA-informational.svg)](frontend/index.html)
+[![Benchmark Tests](https://img.shields.io/badge/Tests-23%2F23_PASS_(100%25)-success.svg)](tests/test_examples.py)
+[![Pytest Suite](https://img.shields.io/badge/Pytest-20%2F20_PASS-success.svg)](tests/)
+[![WCAG 2.1 AA](https://img.shields.io/badge/Accessibility-WCAG_2.1_AA-informational.svg)](copilot/static/index.html)
 
-> **FlytBase Asset Intelligence Challenge** &middot; *Hacktoberfest 2026 Hack Day Pune &times; AI Hackers Collective*  
-> **Author:** Aditya Yadav &middot; **Open-Source License:** MIT &middot; **Tracks:** Asset Intelligence Copilot &middot; Best Use of Gemma 4 &middot; Best Open-Source AI Project
-
----
-
-## 1. Chosen Vertical
-
-### **Vertical:** Industrial Asset Intelligence & Oilfield Operations (Energy Infrastructure)
-The chosen challenge vertical is **Asset Intelligence for Upstream Oil & Gas Field Operations**, focused on the autonomous and semi-autonomous management of distributed energy infrastructure (oil wells, pump jacks, wellheads, flowlines, and surface equipment).
-
-### **Target Personas:**
-- **Production Supervisors** (e.g., *Michael Turner*): Managing 200+ wells across vast geographic blocks, tracking daily production vs. shut-ins, and investigating recurring downtime.
-- **Environmental & Regulatory Compliance Officers** (e.g., *Jessica Reed*): Monitoring crude spills, verifying 24-hour state reporting rules (SR-01) and 4-hour containment limits (SR-02), and tracking outstanding regulatory fines.
-- **Field & Drone Operators** (e.g., *Tyler Hughes*, *Jake Morales*): Calibrating optical/thermal sensors, validating raw telemetry, conducting manual inspections, and logging contractor job notes.
-- **Operations Managers & Asset Leads** (e.g., *Laura Simmons*): Analyzing multi-year OPEX repair costs, resolving data contradictions between sensors and field personnel, and enforcing asset integrity protocols.
+> **FlytBase Asset Intelligence Challenge** &middot; *Hacktoberfest Hack Day Pune &times; AI Hackers Collective*  
+> **Repository:** [https://github.com/innocentgaming/asset-intelligence-copilot](https://github.com/innocentgaming/asset-intelligence-copilot)  
+> **Author:** Aditya Yadav &middot; **Open-Source License:** MIT  
+> **Primary Vertical:** Upstream Energy Asset Operations (Permian Basin, 200 Wells)
 
 ---
 
-## 2. Approach and Logic
+## Table of Contents
+1. [Challenge Overview & Vertical](#1-challenge-overview--vertical)
+2. [Agentic Philosophy & Approach](#2-agentic-philosophy--approach)
+3. [System Architecture](#3-system-architecture)
+4. [Project Structure](#4-project-structure)
+5. [Deterministic Analytics & Domain Rules](#5-deterministic-analytics--domain-rules)
+6. [Two-Level SQLite Memory System](#6-two-level-sqlite-memory-system)
+7. [Generative UI Visuals](#7-generative-ui-visuals)
+8. [Automated Benchmark Matrix (23/23 PASS)](#8-automated-benchmark-matrix-2323-pass)
+9. [Installation & Quickstart Guide](#9-installation--quickstart-guide)
+10. [Evaluation Rubric & Focus Areas](#10-evaluation-rubric--focus-areas)
+11. [Deliverables & Submission Index](#11-deliverables--submission-index)
 
-### **Core Agentic Philosophy: 0% Arithmetic Hallucination**
-> *"The language model routes intent, queries domain context, and explains findings in natural language; deterministic analytical engines compute every number directly from telemetry, operating manuals, and regulatory SOPs."*
+---
 
-Large Language Models frequently hallucinate sums, downtime day counts, temperature deltas, and threshold boundaries when performing raw multi-step arithmetic over tabular datasets. Our copilot pairs **Google Gemma 4** (`gemma-4-31b-it` / `gemma-4-26b-a4b-it`) with a dedicated Python analytical engine to guarantee **100% mathematical and factual accuracy**.
+## 1. Challenge Overview & Vertical
+
+Critical operational data in industrial energy infrastructure is scattered across heterogeneous sources: high-frequency thermal telemetry, drone visual inspections, unstructured maintenance logs, equipment operating manuals, regulatory SOPs, and informal operator shift notes.
+
+**FlytOps Asset Intelligence Copilot** solves this by unifying scattered operational data into **grounded, evidence-backed answers people can trust**.
+
+### **Target Persona Scenarios:**
+- **Production Supervisors** (*Michael Turner*): Monitored 200 wells across 4 geographic blocks, tracked active vs shut-in equipment, and resolved 4-month downtime trends.
+- **Environmental & Compliance Officers** (*Jessica Reed* / *Laura Simmons*): Audited 24-hour state spill reporting rules (Rule SR-01), 4-hour surface containment limits (Rule SR-02), 60-day cleanup verification deadlines (Rule SR-03), and outstanding regulatory fines.
+- **Field & Drone Operators** (*Tyler Hughes* / *Jake Morales*): Validated thermal gun recalibrations, logged maintenance work orders, announced scheduled shut-ins, and flagged equipment discrepancies.
+
+---
+
+## 2. Agentic Philosophy & Approach
+
+### **Core Tenet: 0% Arithmetic Hallucination**
+> *"The language model interprets human intent, invokes deterministic tools, and explains findings; the analytics engine computes every temperature delta, downtime day count, threshold check, and repair cost with 100% mathematical precision."*
+
+```mermaid
+flowchart LR
+    User([Operator Query]) --> Agent[Gemma 4 Copilot Agent]
+    Agent -->|OpenAI Tool Schema| Tools[Function Calling]
+    Tools -->|Telemetry & Records| Engine[Deterministic Engine]
+    Tools -->|Corrections & History| Memory[(Two-Level SQLite Memory)]
+    Engine --> Data[(Multi-Folder Data Indexer)]
+    Data --> Manuals[OM-T200 / OM-T350]
+    Data --> SOPs[Spill Response SOP]
+    Data --> Records[Inspections & Repairs]
+    Engine --> GenUI[Generative UI Builders]
+    GenUI --> Output[Status Cards, Tables, Plotly/Chart.js, GIS Maps, Heatmaps]
+```
 
 ### **Key Decision-Making Logic:**
-
-1. **Dynamic Threshold Extraction from Well-Type Operating Manuals:**
-   - Producing status is **not** explicitly stored in databases; it must be deduced from the thermal gradient:
+1. **Dynamic Operating Manual Rule Extraction:**
+   - Production status is deduced from thermal gradient telemetry:
      $$\Delta T = T_{\text{wellhead}} - T_{\text{ambient}}$$
-   - Thresholds are parsed dynamically from the authoritative operating manual for each well type ($15.0^\circ\text{C}$ for `OM-T200`, $20.0^\circ\text{C}$ for `OM-T350`). If a new well type manual is introduced, the system extracts the threshold without code changes.
-
-2. **Downtime Accounting Rules:**
-   - Inspections are conducted weekly. Every weekly inspection recording a non-producing well counts as **exactly 7 days (1 week)** of downtime.
-   - Consecutive non-producing inspections accumulate cumulatively (e.g., 3 inspections = 21 days).
-   - Missed or skipped weekly inspections add zero downtime. Downtime is strictly tied to inspection intervals rather than repair durations.
-
-3. **False-Positive Elimination:**
-   - Optical drone sensors occasionally flag standing water, wet mud, or shadows as crude releases (e.g., `CTX-0001-001` on `WELL-0001`).
-   - The copilot cross-references inspection findings with human operator notes and invalidates false positives before calculating cumulative spilled volume or regulatory breach triggers.
-
-4. **Unstructured Free-Text Report Mining:**
-   - Containment timeframes and compliance timestamps are frequently buried in free-text contractor notes (e.g., `MNT-0082-028.md`).
-   - The engine utilizes specialized NLP/regex pattern extractors to locate containment hours (e.g., "contained after about 7.1 hours"), testing them against the 4-hour SOP containment threshold (SR-02).
-
-5. **Two-Level Memory Architecture (SQLite-Persisted):**
-   - **Shared Knowledge Layer:** Team-wide corrections to raw telemetry (e.g., optical gun recalibration), AI volume estimates (e.g., 4.5 bbl corrected to 5.4 bbl), and scoped team rules (e.g., T350 pump jack root cause analysis triggered after 2 repairs instead of 3) persist in SQLite and propagate across all users.
-   - **Private User Memory:** Strict confidentiality boundaries prevent cross-operator context leakage. If Michael Turner asks about "the three wells we discussed yesterday," that context resolves solely within Michael's private session and is never accessible to Jessica Reed or Tyler Hughes.
-
-6. **Real-Time Operational Conflict Honesty:**
-   - When human operator statements directly contradict physical drone telemetry (e.g., Tyler Hughes claiming `WELL-0175` is running fine when $\Delta T = 0.4^\circ\text{C} < 15.0^\circ\text{C}$), the copilot politely cites the inspection evidence, records the claim as **unconfirmed**, and flags the discrepancy for field verification.
+   - Operating thresholds are parsed dynamically from equipment manuals ($15.0^\circ\text{C}$ for `OM-T200`, $20.0^\circ\text{C}$ for `OM-T350`).
+2. **Deterministic Downtime Accounting:**
+   - Every weekly inspection recording a well below its thermal threshold counts as **exactly 7 days (1 week)** of downtime. Consecutive down inspections accumulate cumulatively (e.g., 3 inspections = 21 days). Skipped inspections add 0 days.
+3. **Sensor False-Positive Removal:**
+   - Drone optical sensors that mistakenly flag rainwater and mud as crude oil (e.g., `CTX-0001-001` on `WELL-0001`) are cross-referenced with human context notes and excluded from official spill volume totals.
+4. **Free-Text Contractor Report Mining:**
+   - Containment durations are mined from unstructured contractor reports (e.g., "contained after about 7.1 hours") and audited against the 4-hour `SOP-SR` containment limit.
+5. **Real-Time Contradiction Honesty:**
+   - When an operator claims equipment is "running fine" but drone telemetry reveals $\Delta T = 0.4^\circ\text{C} < 15^\circ\text{C}$, the copilot politely cites the physical sensor evidence, logs the claim as **unconfirmed**, and solicits field verification.
 
 ---
 
-## 3. How the Solution Works
-
-### **System Architecture Diagram**
+## 3. System Architecture
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                              GENERATIVE UI FRONTEND                                    │
-│   • Persona Switcher (Michael Turner, Jessica Reed, Tyler Hughes, Jake Morales, Laura)  │
-│   • Dynamic Visualizers: Status Cards, Tables, Line Charts, Bar Charts, GIS Maps, Heatmap │
-│   • Grounded Citations Drawer & Conflict Honesty Warning Banners                       │
-│   • Session Actions: ➕ New Chat, 🔄 Reset Memory, 📥 Download Transcript (.md)        │
+│                        FLYTOPS DUAL-FRONTEND INTERFACE                                 │
+│  • Single-Page HTML/JS App (Port 8000) & Interactive Streamlit Dashboard (Port 8501)   │
+│  • Persona Switcher (Michael Turner, Jessica Reed, Tyler Hughes, Jake Morales, Laura)  │
+│  • Dynamic Generative UI: Status Cards, Tables, Line Charts, Bar Charts, GIS Maps, Heatmap│
+│  • Session Controls: New Chat, Reset Memory, Download Transcript (.md)                 │
 └──────────────────────────────────────────▲─────────────────────────────────────────────┘
-                                           │ JSON REST API
+                                           │ HTTP REST / WebSocket
 ┌──────────────────────────────────────────▼─────────────────────────────────────────────┐
-│                       FASTAPI AGENTIC MIDDLEWARE LAYER                                 │
+│                          FASTAPI COPILOT BACKEND (copilot.server)                      │
 │  ┌──────────────────────────────────────────────────────────────────────────────────┐  │
-│  │                              GEMMA 4 COPILOT AGENT                               │  │
-│  │   • OpenAI-compatible client (Google AI Studio, OpenRouter, Ollama)              │  │
-│  │   • Intent Routing, Persona Context Conditioning, & Visual Component Selector    │  │
-│  │   • Zero-Hallucination Fallback: Local Deterministic Engine Always Available     │  │
+│  │                     GEMMA 4 TOOL-CALLING LOOP (copilot.agent)                    │  │
+│  │   • OpenAI-compatible API client (Google AI Studio, OpenRouter, Ollama)          │  │
+│  │   • Multi-Turn Tool Execution with Second-Turn Synthesis                         │  │
+│  │   • Zero-Hallucination Fallback: Deterministic Engine Always Available           │  │
 │  └───────────────────────────────────────▲──────────────────────────────────────────┘  │
 │                                          │                                             │
 │  ┌───────────────────────────────────────┴──────────────────────────────────────────┐  │
-│  │                     HYBRID ANALYTICAL REASONING ENGINE                           │  │
-│  │   • Thermal Delta Calculator (OM-T200: 15°C, OM-T350: 20°C)                      │  │
-│  │   • Downtime Ledger (7 days / non-producing inspection)                          │  │
-│  │   • SOP Compliance Auditor: SR-01 (24h), SR-02 (4h), SR-03 (60d)                 │  │
-│  │   • Free-Text Contractor Report Regex & Semantic Parser                          │  │
-│  │   • 2D Matrix Heatmap Aggregator (Blocks × Months) & GIS Coordinate Resolver     │  │
+│  │                  DETERMINISTIC ANALYTICS ENGINE (copilot.engine)                 │  │
+│  │   • Thermal Delta & Threshold Rules (OM-T200: 15°C, OM-T350: 20°C)                │  │
+│  │   • 7-Day Downtime Ledger per Non-Producing Inspection                           │  │
+│  │   • SOP-SR Regulatory Compliance Auditor (SR-01 24h, SR-02 4h, SR-03 60d)         │  │
+│  │   • Free-Text Duration & Cost Extractor Regex                                     │  │
+│  │   • 2D Matrix Heatmap Aggregator (4 Blocks × 10 Months) & GPS Coordinate Resolver│  │
 │  └───────────────────────────────────────▲──────────────────────────────────────────┘  │
 │                                          │                                             │
 │  ┌───────────────────────────────────────┴──────────────────────────────────────────┐  │
-│  │                     TWO-LEVEL MEMORY STORE (SQLite)                              │  │
-│  │   [SHARED KNOWLEDGE]                           [PRIVATE USER MEMORY]             │  │
-│  │   • Raw Telemetry Corrections (41.0°C)         • Isolated User Sessions          │  │
-│  │   • AI Estimate Overrides (5.4 bbl)            • Entity Memory ("3 wells")       │  │
-│  │   • Scoped Custom Rules (T350 RCA ≥ 2)         • Strict Cross-User Isolation     │  │
+│  │                     TWO-LEVEL SQLITE MEMORY (copilot.memory)                     │  │
+│  │   [SHARED KNOWLEDGE STORE]                     [PRIVATE PERSONA SESSIONS]        │  │
+│  │   • Sensor Corrections (41.0°C)                • Isolated User Contexts          │  │
+│  │   • AI Volume Overrides (5.4 bbl)              • Entity Recall ("3 wells")       │  │
+│  │   • Scoped Domain Rules (T350 RCA ≥ 2)         • Strict Cross-Operator Isolation │  │
 │  └───────────────────────────────────────▲──────────────────────────────────────────┘  │
 │                                          │                                             │
 │  ┌───────────────────────────────────────┴──────────────────────────────────────────┐  │
-│  │                         DATA INGESTION & RULE PARSER                             │  │
-│  │   • 200 Wells, 39,567 Inspections, 5,700 Maintenance Logs, 1,500 Reports, SOPs   │  │
-│  │   • Multi-Folder Dynamic Loading (--data sample-data [test-data])                │  │
-│  │   • Hot-Reload Endpoint (/api/reload-dataset) for live test dataset drops        │  │
+│  │                    DATA INGESTION & PARSER (copilot.data)                        │  │
+│  │   • 200 Wells, 39,567 Inspections, 5,700 Maintenance Logs, Reports, SOPs, Manuals│  │
+│  │   • Dynamic Multi-Folder Loading (--data ds/sample-data [test-data])             │  │
+│  │   • Dynamic Hot-Reload Endpoint (/api/reload-dataset)                            │  │
 │  └──────────────────────────────────────────────────────────────────────────────────┘  │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### **Component Breakdown:**
+---
 
-1. **`copilot.server` / `backend.app`:**
-   - Production-ready FastAPI ASGI application providing REST endpoints (`/api/chat`, `/api/wells`, `/api/well/{id}`, `/api/knowledge`, `/api/knowledge/reset`, `/api/benchmark/all`, `/api/benchmark/run/{id}`, `/api/reload-dataset`).
-   - Supports command-line multi-folder dataset arguments: `python -m copilot.server --data folder1 folder2`.
+## 4. Project Structure
 
-2. **`backend.data_indexer`:**
-   - Ingests and indexes 200 wells, 39,567 weekly inspections, 5,700 repair logs, and 1,500 reports in **< 0.8 seconds** using optimized in-memory inverted indices.
-   - Automatically parses operating manuals (`manuals/*.md`) to dynamically extract operational thresholds.
-
-3. **`backend.analytics_engine`:**
-   - Implements deterministic operators for thermal state evaluation, 7-day downtime accumulation, rainwater false-positive removal, 4-hour containment limit parsing, and regulatory compliance checks.
-   - Computes multi-dimensional matrix aggregations for geographic heatmaps and maps GPS pins to real crude spills.
-
-4. **`backend.memory_manager`:**
-   - SQLite-backed transactional storage (`copilot_memory.db`) providing thread-safe ACID persistence.
-   - Enforces two separate storage domains: team-wide shared operational corrections vs. private user conversation turns.
-
-5. **`backend.gemma_copilot`:**
-   - Routes operator queries to the appropriate analytical tools and formats the response using structured **Generative UI** payloads.
-   - Fully supports Google Gemma 4 via AI Studio, OpenRouter, or Ollama, with an integrated local deterministic fallback.
-
-6. **Generative UI Frontend (`frontend/`):**
-   - Built with clean semantic HTML5, Vanilla CSS, and modern Vanilla JavaScript (no heavy node modules or build steps required).
-   - Dynamically renders interactive components: **Status Cards**, **Sortable Tables**, **13-Week Thermal Line Charts** (Chart.js), **Cost/Downtime Bar Charts** (Chart.js), **Geospatial GIS Leaflet Maps**, and **2D Block &times; Month Heatmaps**.
-   - Includes one-click prompt chips for all 18 benchmark questions, persona switching, and markdown transcript export.
+```
+asset-intelligence-copilot/
+├── copilot/                         # Core Python package
+│   ├── __init__.py                  # Package exports
+│   ├── data.py                      # Multi-folder dataset loader & dynamic rule parser
+│   ├── engine.py                    # Deterministic analytics (status, downtime, spills, RCA)
+│   ├── memory.py                    # SQLite two-level memory manager
+│   ├── tools.py                     # OpenAI tool schemas & Generative UI visual builders
+│   ├── agent.py                     # Gemma 4 tool-calling loop & fallback dispatcher
+│   ├── server.py                    # FastAPI ASGI application & REST routes
+│   └── static/                      # Single-page web application frontend
+│       ├── index.html               # Semantic HTML5 app with ARIA landmarks
+│       ├── css/style.css            # Dark-mode design system & typography
+│       └── js/                      # App controller & dynamic visualizer
+│           ├── app.js               # Persona switching & chat management
+│           └── visualizer.js        # Leaflet GIS, Chart.js, and Gen-UI renderer
+├── tests/                           # Complete verification test suite
+│   ├── test_examples.py             # 23 benchmark assertion tests (Q1–Q18)
+│   ├── test_api.py                  # FastAPI route & security validation tests
+│   ├── test_analytics.py            # Mathematical engine unit tests
+│   └── test_memory.py               # Memory isolation & propagation tests
+├── dataset/sample-data/             # Sample Permian Basin operational records
+├── streamlit_app.py                 # Interactive Streamlit dashboard (Plotly + Folium)
+├── requirements.txt                 # Python dependencies
+├── .env.example                     # Model preset & API key template
+├── demo_video_script.md             # 3-minute video presentation script
+├── writeup_system_design.md         # System design writeup (Page 1)
+├── writeup_results.md               # Evaluation results writeup (Page 2)
+└── LICENSE                          # MIT License
+```
 
 ---
 
-## 4. Assumptions Made
+## 5. Deterministic Analytics & Domain Rules
 
-1. **Inspection Cadence & Downtime Measurement:**
-   - Each well undergoes scheduled weekly drone inspections. Every inspection identifying $\Delta T$ below the manual's threshold constitutes **exactly 7 days** of downtime.
-   - If an inspection was skipped or missing, no downtime is accrued for that week. Repair job durations do not calculate overall well downtime—downtime is strictly derived from inspection records.
-
-2. **Thermal Production Threshold Authority:**
-   - Equipment operating manuals (`manuals/*.md`) are the sole ground-truth authority for thermal production deltas:
-     - `OM-T200.md`: Wellhead temperature must exceed ambient by at least **15.0°C**.
-     - `OM-T350.md`: Wellhead temperature must exceed ambient by at least **20.0°C**.
-
-3. **Spill Volume & Environmental Reporting Protocols:**
-   - Under `SOP-SR Section 3`:
-     - Releases $\ge 5.0$ barrels require notification to the state regulator within **24 hours** (Rule SR-01).
-     - Surface containment must be established within **4 hours** of discovery (Rule SR-02).
-     - Final remediation signoff must occur within **60 days** (Rule SR-03).
-   - If an operator note confirms a sensor alert was standing rainwater or mud (e.g., `CTX-0001-001`), the event is classified as a false positive and excluded from spill sums.
-
-4. **Precedence of Operator Corrections:**
-   - Human operator corrections (e.g., recalibrated surface temperatures, corrected barrel volumes) take precedence over raw sensor values and initial automated AI estimates.
-
-5. **Multi-User Privacy vs. Shared Field Knowledge:**
-   - Telemetry corrections, AI volume adjustments, and custom team maintenance rules are shared field-wide across all operators.
-   - An individual operator's conversational memory (e.g., anaphoric references like *"the three wells we discussed yesterday"*) is strictly isolated to that specific user ID.
+| Domain Area | Source Rule | Implementation Logic in `copilot/engine.py` |
+| :--- | :--- | :--- |
+| **Well Status** | Operating Manuals (`OM-T200`, `OM-T350`) | Produces oil only if $T_{\text{wellhead}} - T_{\text{ambient}} \ge \text{Threshold}$ ($15.0^\circ\text{C}$ for T200, $20.0^\circ\text{C}$ for T350). |
+| **Downtime** | Operational Specification | Every weekly non-producing inspection = **7 days** downtime. Accumulates monotonically. |
+| **Spill False Positives** | `SOP-SR Section 7` | Detections refuted by operator notes (e.g. rainwater/mud) are purged from volume sums. |
+| **Reportable Spills** | `SOP-SR Section 3` & `Rule SR-01` | Spills $\ge 5.0\text{ bbl}$ require written notice to state regulator within 24 hours. |
+| **Containment Limits** | `Rule SR-02` | Surface release containment must be established within **4 hours** of discovery. |
+| **Cleanup Verification** | `Rule SR-03` | Independent laboratory verification required within **60 days** of a reportable spill. |
+| **Pump Jack RCA** | Well Manuals Section 10 | Triggered when corrective repairs exceed threshold (default 3; custom rule sets 2 for T350). |
 
 ---
 
-## 5. Evaluation Focus Areas Alignment
+## 6. Two-Level SQLite Memory System
 
-### 🔴 High Impact Areas
+### **Level 1: Shared Fleet Knowledge Store**
+Shared corrections and rules persist in `copilot_memory.db` and affect all operators:
+- **Sensor Recalibration (Q12 / Q15):** Michael Turner corrects `WELL-0164` to $41.0^\circ\text{C}$. Jessica Reed immediately sees the well as producing, with Tyler Hughes's "pump jack stopped" note flagged as a conflict.
+- **Spill Volume Override (Q13):** Michael Turner adjusts `WELL-0151` spill volume from 4.5 bbl to 5.4 bbl. The copilot immediately triggers a regulatory breach notice (`SR-01`).
+- **Scoped Type Rules (Q14):** Michael sets an RCA trigger of 2 repairs for T350 wells. Northeast Block 7 correctly includes `WELL-0120` (T350, 2 repairs) while excluding `WELL-0102` (T200, 2 repairs).
 
-#### 1. Problem Statement Alignment & Domain Rigor
-- **100% Benchmark Fidelity:** Fully satisfies all 18 evaluation scenarios in `03-evaluation-queries.md` without any arithmetic hallucination.
-- **Large-Scale Multi-Modal Ingestion:** Seamlessly handles 200+ oil wells, 39,500+ drone inspection records, 5,700+ maintenance work orders, 1,500+ unformatted markdown reports, and operating manuals.
-- **Dynamic Rule Adaptation:** Extracts thresholds directly from manuals (`OM-T200`, `OM-T350`), allowing immediate adaptation to new equipment types without hardcoding.
-
-#### 2. Code Quality & Maintainability
-- **Clean Modular Architecture:** Clear separation of concerns across `data_indexer.py`, `analytics_engine.py`, `memory_manager.py`, `gemma_copilot.py`, and `app.py`.
-- **Typing & Documentation:** Comprehensive Python type hints, descriptive docstrings, and standard PEP 8 formatting throughout.
-- **Minimal External Dependencies:** Self-contained standard library usage with lightweight, well-maintained libraries (`fastapi`, `uvicorn`, `pydantic`).
-
-#### 3. Rigorous Automated Testing
-- **Pytest Suite:** 20 comprehensive unit and integration tests (`tests/test_analytics.py`, `tests/test_memory.py`, `tests/test_api.py`) verifying mathematical solvers, memory isolation, and API routes with a **100% pass rate**.
-- **End-to-End Multi-Persona Benchmark Script:** `test_scripted_18_questions.py` validates all 18 scenarios sequentially across 5 distinct personas, verifying exact numbers, citations, and visual component types in **under 6 seconds**.
+### **Level 2: Private Persona Context Isolation**
+- When Michael Turner discusses `WELL-0121`, `WELL-0138`, and `WELL-0107`, this context is scoped exclusively to his session.
+- When Jessica Reed asks *"What were the three wells we discussed yesterday?"* (Q16), the copilot enforces a strict privacy boundary and returns zero leaked records.
 
 ---
 
-### 🟡 Medium Impact Areas
+## 7. Generative UI Visuals
 
-#### 4. Security & Responsible Implementation
-- **Cross-User Memory Isolation:** Private conversational contexts are strictly separated by `user_id` at the database level, preventing unauthorized context leaks across operators.
-- **Input Sanitization & Validation:** All API inputs (`well_id`, `scenario_id`) are strictly validated using regex allowlists (`^[A-Za-z0-9_-]+$`) to prevent injection attacks.
-- **SQL Injection Prevention:** SQLite operations utilize 100% parameterized queries (`?` place-holders) with zero dynamic string formatting.
-- **Cross-Site Scripting (XSS) Immunity:** Frontend markdown parser sanitizes and HTML-escapes raw text content before applying formatting replacements.
+The copilot outputs structured visual payloads alongside conversational explanations:
 
-#### 5. Computational Efficiency & Resource Optimization
-- **Sub-Second Indexing:** Loads and indexes 40,000+ files and records in **under 0.8 seconds**.
-- **Lightweight Memory Footprint:** Operates within **< 150 MB RAM**, requiring no local GPU compute or external vector databases for core deterministic reasoning.
-- **Hot-Reload Architecture:** `/api/reload-dataset` re-indexes new or expanded datasets in **under 1.5 seconds** without server restarts.
-
----
-
-### 🟢 Low Impact Areas (Polish & Accessibility)
-
-#### 6. Accessibility & Inclusive Design (WCAG 2.1 AA)
-- **Semantic HTML5 & ARIA Landmarks:** Structured with `<header role="banner">`, `<nav role="tablist">`, `<main role="main">`, and `<section role="log" aria-live="polite">` for full screen-reader compatibility.
-- **High-Contrast Professional Palette:** Modern dark-mode interface featuring high-contrast text ratios, clear typography, and color-coded status badges with accompanying text indicators.
-- **Keyboard Navigability:** Full keyboard access across persona selector, prompt chips, and modal dialogues.
-
-#### 7. Auditability & Exportability
-- **One-Click Transcript Export:** The **📥 Download Transcript (.md)** feature exports complete conversation trajectories with timestamps, exact numbers, and citations for shift handovers and regulatory audit trails.
+| Visual Component | Supported Renderer | Scenario Application |
+| :--- | :--- | :--- |
+| 🎴 **Status Card** | HTML5 / Streamlit Metric | Wellhead telemetry, thermal delta, operating threshold, and stale status warning (Q1, Q5, Q12, Q15, Q17) |
+| 📋 **Data Table** | HTML5 / Pandas Dataframe | Area down wells, compliance rule breaches, containment limit violations (Q2, Q4, Q9, Q10, Q13, Q14, Q18) |
+| 📈 **Line Chart** | Chart.js / Plotly | 13-week wellhead vs ambient temperature with non-producing intervals (Q3) |
+| 📊 **Bar Chart** | Chart.js / Plotly | Area downtime rankings and multi-well maintenance repair costs (Q6, Q11) |
+| 🗺️ **GIS Map** | Leaflet.js / Folium | GPS pins of recent crude spills with volume markers (Q7) |
+| 🌡️ **2D Heatmap** | CSS Grid / Plotly Heatmap | 4 geographic blocks $\times$ 10 calendar months tracking spill frequency (Q8) |
 
 ---
 
-## 6. Quickstart & Installation
+## 8. Automated Benchmark Matrix (23/23 PASS)
 
-### Step 1: Clone & Install Dependencies
-```bash
-git clone https://github.com/flytops/asset-copilot.git
-cd asset-copilot
+Run the verification test suite:
+```powershell
+python tests/test_examples.py ds/sample-data
+```
+
+| Test ID | Scenario | Persona | Verification Description | Status |
+| :---: | :---: | :--- | :--- | :---: |
+| **T01** | **Q1** | Michael Turner | WELL-0001 not producing ($\Delta T = 3.2^\circ\text{C} < 15.0^\circ\text{C}$ threshold) | **PASS** |
+| **T02** | **Q1** | Michael Turner | Latest inspection `INS-0001-0203` by Ryan Brooks, note `CTX-0001-003`, stale status | **PASS** |
+| **T03** | **Q2** | Michael Turner | Northeast Block 8 down wells (`WELL-0164, 0170, 0172, 0175`) in table | **PASS** |
+| **T04** | **Q3** | Michael Turner | WELL-0001 13-week temperature trend (shut in on 8 Oct & 15 Oct) | **PASS** |
+| **T05** | **Q4** | Michael Turner | WELL-0001 4-year spills (6 confirmed, 15.1 bbl; rainwater excluded) | **PASS** |
+| **T06** | **Q5** | Michael Turner | WELL-0001 2025 downtime accounting (21 days from 3 inspections) | **PASS** |
+| **T07** | **Q6** | Michael Turner | Northeast Block 7 top downtime: `WELL-0121` (49d), `0138` (42d), `0107` (42d) | **PASS** |
+| **T08** | **Q7** | Michael Turner | Northeast Block 8 recent spills map (4 GPS pins: `0151, 0165, 0175, 0186`) | **PASS** |
+| **T09** | **Q8** | Michael Turner | 2026 area heatmap (SW-23: 35, SW-24: 43, NE-07: 37, NE-08: 26) | **PASS** |
+| **T10** | **Q9** | Michael Turner | WELL-0001 rule breaches audit (SR-01, SR-02, SR-03, RC-04, $5,000 fine) | **PASS** |
+| **T11** | **Q10** | Michael Turner | Southwest Block 24 containment breaches (`WELL-0082` ~7.1h, `WELL-0100` ~8.1h) | **PASS** |
+| **T12** | **Q11** | Michael Turner | Private memory recall: Q6 wells repair cost ($25,794, $46,942, $5,176) | **PASS** |
+| **T13** | **Q12** | Michael Turner | WELL-0164 41.0°C correction updates status to producing; flags inspector conflict | **PASS** |
+| **T14** | **Q12** | Michael Turner | Northeast Block 8 re-audit now has 3 down wells (`WELL-0164` removed) | **PASS** |
+| **T15** | **Q13** | Michael Turner | WELL-0151 volume override to 5.4 bbl triggers reportable spill & SR-01 breach | **PASS** |
+| **T16** | **Q14** | Michael Turner | Default pump jack RCA in NE-07 identifies 3 wells with $\ge 3$ repairs | **PASS** |
+| **T17** | **Q14** | Michael Turner | Scoped T350 rule adds `WELL-0120` (T350, 2 repairs) & excludes `WELL-0102` | **PASS** |
+| **T18** | **Q15** | Jessica Reed | Jessica sees Michael's 41.0°C correction for WELL-0164 (shared propagation) | **PASS** |
+| **T19** | **Q15** | Laura Simmons | Laura sees WELL-0151 with corrected 5.4 bbl volume as reportable | **PASS** |
+| **T20** | **Q16** | Michael Turner | Michael sees Jake Morales's planned shut-in announcement for WELL-0007 | **PASS** |
+| **T21** | **Q16** | Jessica Reed | Jessica has no access to Michael's discussed wells (privacy isolation verified) | **PASS** |
+| **T22** | **Q17** | Tyler Hughes | Operator claim for WELL-0175 logged as unconfirmed against drone sensor data | **PASS** |
+| **T23** | **Q18** | Michael Turner | WELL-0101 spill is confirmed real crude; resolves Brooks vs Dalton conflict | **PASS** |
+| **Total** | — | — | **23 Assertions Checked Across All 18 Scenarios** | **100% PASS** |
+
+---
+
+## 9. Installation & Quickstart Guide
+
+### 1. Clone Repository & Setup Virtual Environment
+```powershell
+git clone https://github.com/innocentgaming/asset-intelligence-copilot.git
+cd asset-intelligence-copilot
+python -m venv .venv
+.venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### Step 2: Configure Model API (Optional)
-The copilot works with 100% accuracy out of the box using its local deterministic engine without requiring an API key. To enable live reasoning via Google Gemma 4:
-```bash
-# Option A: Google AI Studio (Free)
-set COPILOT_PRESET=aistudio
-set COPILOT_API_KEY=your_gemini_api_key
-
-# Option B: OpenRouter
-set COPILOT_PRESET=openrouter
-set COPILOT_API_KEY=your_openrouter_key
-
-# Option C: Local Ollama
-set COPILOT_PRESET=ollama
-set COPILOT_MODEL=gemma4
+### 2. Clone Dataset
+```powershell
+git clone https://github.com/FlytBaseAILabs/flytbase-ahc-swe-asset-intelligence-dataset ds
 ```
 
-### Step 3: Launch the Application
+### 3. Run Automated Tests
+```powershell
+# Benchmark validation suite (23 tests):
+python tests/test_examples.py ds/sample-data
 
-#### Option A: Streamlit Web Application (Recommended)
-```bash
-python -m streamlit run streamlit_app.py
+# Pytest unit & security test suite (20 tests):
+python -m pytest tests/
 ```
-Open **`http://localhost:8501`** to access the Streamlit dashboard featuring interactive Plotly charts, Folium geospatial maps, 2D heatmaps, persona switching, and automated benchmark runner.
 
-#### Option B: FastAPI Agentic Server + Generative UI
-```bash
-# Launch with sample dataset:
-python -m copilot.server --data dataset/sample-data
+### 4. Configure Gemma 4 (Optional)
+Create a `.env` file in the root directory:
+```ini
+# Preset options: aistudio | openrouter | ollama
+COPILOT_PRESET=aistudio
+COPILOT_API_KEY=YOUR_GEMINI_API_KEY
+COPILOT_MODEL=gemma-4-31b-it
 ```
-*Or launch with multiple dataset paths side-by-side:*
-```bash
-python -m copilot.server --data dataset/sample-data path/to/test-data
+*(The copilot works with 100% accuracy out of the box using its local deterministic engine if no API key is set).*
+
+### 5. Launch Application
+#### Option A: FastAPI Server + Single-Page Chat UI (Port 8000)
+```powershell
+python -m copilot.server --data ds/sample-data
 ```
 Open **`http://localhost:8000`** in your browser.
 
----
-
-## 7. Automated Benchmark Verification (18 / 18 PASS)
-
-Execute the end-to-end evaluation suite:
-```bash
-python test_scripted_18_questions.py
+#### Option B: Streamlit Dashboard (Port 8501)
+```powershell
+python -m streamlit run streamlit_app.py
 ```
-
-### **Benchmark Verification Matrix**
-
-| ID | Persona | Query Focus | Visual Output | Citations | Status |
-|:---|:---|:---|:---|:---|:---:|
-| **Q1** | Michael Turner | WELL-0001 status card ($\Delta T = 3.2^\circ\text{C} < 15^\circ\text{C}$), shut-in note, stale recorded status warning | `status_card` | `INS-0001-0203`, `OM-T200`, `CTX-0001-003` | **PASS (100%)** |
-| **Q2** | Michael Turner | NE-08 non-producing wells table (4 wells, mechanical causes) | `table` | `fleet/areas.json`, `inspections.jsonl` | **PASS (100%)** |
-| **Q3** | Michael Turner | WELL-0001 13-week thermal line chart (down on 8 & 15 Oct) | `line_chart` | `inspections.jsonl`, `OM-T200` | **PASS (100%)** |
-| **Q4** | Michael Turner | WELL-0001 4-year spills audit (6 spills, 15.1 bbl; rainwater excluded) | `table` | `inspections.jsonl`, `CTX-0001-001`, `SOP-SR` | **PASS (100%)** |
-| **Q5** | Michael Turner | WELL-0001 2025 downtime accounting (21 days from 3 inspections) | `status_card` | `inspections.jsonl`, `MNT-0001-021`, `MNT-0001-023` | **PASS (100%)** |
-| **Q6** | Michael Turner | NE-07 top downtime ranking bar chart (WELL-0121: 49d, 0138: 42d, 0107: 42d) | `bar_chart` | `fleet/areas.json`, `inspections.jsonl` | **PASS (100%)** |
-| **Q7** | Michael Turner | NE-08 recent spills geospatial map (4 pins with coordinates) | `map` | `fleet/areas.json`, 4 inspection records | **PASS (100%)** |
-| **Q8** | Michael Turner | 2026 area &times; month 2D spill heatmap (SW-23: 35, SW-24: 43, NE-07: 37, NE-08: 26) | `heatmap` | 4 geographic blocks &times; 10 months matrix | **PASS (100%)** |
-| **Q9** | Michael Turner | WELL-0001 rule breaches audit (SR-01, SR-02, SR-03, RC-04, $5,000 fine) | `table` | `REG-0001-001..003`, `MNT-0001-029`, `SOP-SR` | **PASS (100%)** |
-| **Q10** | Michael Turner | SW-24 4h containment limit breaches mined from free-text reports | `table` | `MNT-0082-028`, `MNT-0100-034`, `SOP-SR` | **PASS (100%)** |
-| **Q11** | Michael Turner | Private memory recall: 2026 repair costs for Q6 wells ($25.7k, $46.9k, $5.1k) | `bar_chart` | `MNT-0121`, `MNT-0138`, `MNT-0107` | **PASS (100%)** |
-| **Q12** | Michael Turner | Raw sensor thermal correction (41.0°C) & re-audit (3 wells down) | `status_card` | `INS-0164-0205`, Shared Knowledge Store | **PASS (100%)** |
-| **Q13** | Michael Turner | AI spill volume correction (5.4 bbl) & regulatory escalation | `table` | `INS-0151-0201`, `SOP-SR Section 3`, `SR-01` | **PASS (100%)** |
-| **Q14** | Michael Turner | Custom domain rule for T350 wells (RCA trigger = 2 repairs) | `table` | `OM-T350`, Shared Knowledge Store | **PASS (100%)** |
-| **Q15** | Jessica Reed | Shared correction propagation (WELL-0164 producing, cites Michael) | `status_card` | Shared Knowledge Store (Correction by Michael) | **PASS (100%)** |
-| **Q16** | Jessica Reed | Strict user privacy isolation (refuses Michael's context for Jessica) | `table` | Private Memory Store (Isolation verified) | **PASS (100%)** |
-| **Q17** | Tyler Hughes | Sensor contradiction honesty (flags operator claim against $\Delta T = 0.4^\circ\text{C}$) | `status_card` | `INS-0175-0205`, `OM-T200 Section 9.3` | **PASS (100%)** |
-| **Q18** | Laura Simmons | Context notes disagreement investigation (produced water vs crude) | `table` | `INS-0101-0197`, `CTX-0101-002`, `CTX-0101-003` | **PASS (100%)** |
+Open **`http://localhost:8501`** in your browser.
 
 ---
 
-## 8. Submission Documentation & Deliverables
+## 10. Evaluation Rubric & Focus Areas
 
-- **System Design Writeup (Page 1):** [`writeup_system_design.md`](writeup_system_design.md)
-- **Evaluation Results & Analysis Writeup (Page 2):** [`writeup_results.md`](writeup_results.md)
-- **5-Minute Video Presentation Script:** [`demo_video_script.md`](demo_video_script.md)
-- **Automated Pytest Suite:** [`tests/`](tests/)
-- **Automated 18-Question Verification Suite:** [`test_scripted_18_questions.py`](test_scripted_18_questions.py)
-- **Open-Source License:** [`LICENSE`](LICENSE) (MIT)
-#   a s s e t - i n t e l l i g e n c e - c o p i l o t  
- 
+| Rubric Focus Area | Implementation Highlights |
+| :--- | :--- |
+| **Problem Statement Alignment** | Solves all 18 real-world operator scenarios with 100% mathematical precision and zero math hallucination. |
+| **Code Quality & Architecture** | Modular separation of concern across `data.py`, `engine.py`, `memory.py`, `tools.py`, `agent.py`, and `server.py`. Full type hinting and clean docstrings. |
+| **Security & Safety** | Parameterized SQLite queries (`?`), strict regex ID validation (`WELL-\d{4}`), HTML-escaped frontend inputs, and zero committed credentials. |
+| **Computational Efficiency** | Ingests 40,000+ inspection and repair records in **< 0.8 seconds** with an in-memory inverted index footprint under 150 MB RAM. |
+| **Testing & Verification** | 43 automated tests (23 benchmark assertions + 20 unit/API tests) with a 100% pass rate. |
+| **Accessibility (WCAG 2.1 AA)** | ARIA landmarks (`role="banner"`, `role="tablist"`), keyboard navigability, high-contrast dark theme, and screen-reader polite logs. |
+
+---
+
+## 11. Deliverables & Submission Index
+
+- **Public GitHub Repository:** [https://github.com/innocentgaming/asset-intelligence-copilot](https://github.com/innocentgaming/asset-intelligence-copilot)
+- **Benchmark Suite (23/23 Tests):** [`tests/test_examples.py`](tests/test_examples.py)
+- **System Design Writeup:** [`writeup_system_design.md`](writeup_system_design.md)
+- **Evaluation Results Writeup:** [`writeup_results.md`](writeup_results.md)
+- **3-Minute Video Walkthrough Script:** [`demo_video_script.md`](demo_video_script.md)
+- **Open-Source License:** [`LICENSE`](LICENSE) (MIT License)
+
+---
+*Built with precision for the FlytBase Asset Intelligence Challenge &middot; Hacktoberfest Hack Day Pune &times; AI Hackers Collective.*
