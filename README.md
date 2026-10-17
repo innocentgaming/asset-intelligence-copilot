@@ -236,19 +236,24 @@ set COPILOT_PRESET=ollama
 set COPILOT_MODEL=gemma4
 ```
 
-### Step 3: Launch the Server
+### Step 3: Launch the Application
+
+#### Option A: Streamlit Web Application (Recommended)
+```bash
+python -m streamlit run streamlit_app.py
+```
+Open **`http://localhost:8501`** to access the Streamlit dashboard featuring interactive Plotly charts, Folium geospatial maps, 2D heatmaps, persona switching, and automated benchmark runner.
+
+#### Option B: FastAPI Agentic Server + Generative UI
 ```bash
 # Launch with sample dataset:
 python -m copilot.server --data dataset/sample-data
 ```
-
 *Or launch with multiple dataset paths side-by-side:*
 ```bash
 python -m copilot.server --data dataset/sample-data path/to/test-data
 ```
-
-### Step 4: Open the Web Interface
-Navigate to **`http://localhost:8000`** in your browser. Select an operator persona, click a prompt chip or type an inquiry, and explore the interactive Generative UI!
+Open **`http://localhost:8000`** in your browser.
 
 ---
 
